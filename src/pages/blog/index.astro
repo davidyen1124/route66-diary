@@ -67,10 +67,9 @@ const routeNodes = checkpoints.map((stop, i) => {
 
       <ul class="log-list">
         {
-          posts.map((post, i) => (
+          posts.map((post) => (
             <li>
               <a href={`/blog/${post.id}/`}>
-                <span class="prompt">{`[${String(i + 1).padStart(2, '0')}] >`}</span>
                 <span class="title">{post.data.title}</span>
                 <span class="date"><FormattedDate date={post.data.pubDate} /></span>
                 <span class="desc">{post.data.description}</span>
@@ -172,11 +171,6 @@ const routeNodes = checkpoints.map((stop, i) => {
   .log-list li a:hover {
     border-color: var(--phosphor-dim);
     box-shadow: inset 0 0 0 1px rgba(124, 255, 122, 0.2);
-  }
-
-  .prompt {
-    color: var(--amber);
-    font-size: 0.8rem;
   }
 
   .title {
