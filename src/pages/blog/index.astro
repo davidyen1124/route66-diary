@@ -8,6 +8,30 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+const checkpoints = [
+  'Santa Monica',
+  'Los Angeles',
+  'San Bernardino',
+  'Kingman',
+  'Seligman',
+  'Flagstaff',
+  'Gallup',
+  'Albuquerque',
+];
+
+const totalLegs = checkpoints.length - 1;
+const completedLegs = Math.min(posts.length, totalLegs);
+const progressPercent = Math.round((completedLegs / totalLegs) * 100);
+const currentStop = checkpoints[Math.min(completedLegs, checkpoints.length - 1)];
+const nextStop = checkpoints[Math.min(completedLegs + 1, checkpoints.length - 1)];
+const routeNodes = checkpoints.map((stop, i) => {
+  const pct = (i / totalLegs) * 100;
+  const reached = i <= completedLegs;
+  const nodeClass = `node${reached ? ' reached' : ''}${i === completedLegs ? ' current' : ''}${i === checkpoints.length - 1 ? ' end' : ''}`;
+  const label = i === 0 ? 'SM' : i === checkpoints.length - 1 ? 'ABQ' : '•';
+  return { stop, pct, nodeClass, label };
+});
 ---
 
 <!doctype html>
@@ -21,6 +45,25 @@ const posts = (await getCollection('blog')).sort(
       <p class="terminal-label">ROUTE 66 DOS TERMINAL</p>
       <h1>TRAIL LOG INDEX</h1>
       <p class="intro">Select a stop entry to continue.</p>
+
+      <section class="route-graph">
+        <p class="route-title">SANTA MONICA → ABQ PROGRESS MAP</p>
+        <div class="route-line" aria-label="Route 66 progress from Santa Monica to Albuquerque">
+          <div class="route-fill" style={`width: ${progressPercent}%`}></div>
+          {
+            routeNodes.map((node) => (
+              <span class={node.nodeClass} style={`left: ${node.pct}%`} title={node.stop}>
+                {node.label}
+              </span>
+            ))
+          }
+        </div>
+        <div class="route-meta">
+          <span>NOW: {currentStop}</span>
+          <span>NEXT: {nextStop}</span>
+          <span>{progressPercent}% COMPLETE</span>
+        </div>
+      </section>
 
       <ul class="log-list">
         {
@@ -44,6 +87,67 @@ const posts = (await getCollection('blog')).sort(
   .intro {
     color: var(--phosphor-dim);
     margin-bottom: 0.8rem;
+  }
+
+  .route-graph {
+    border: 1px solid var(--frame);
+    padding: 0.6rem;
+    margin: 0 0 0.9rem;
+    background: rgba(18, 28, 18, 0.95);
+  }
+
+  .route-title {
+    margin: 0 0 0.5rem;
+    color: var(--amber);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+
+  .route-line {
+    position: relative;
+    height: 18px;
+    border: 1px solid var(--frame);
+    background: rgba(8, 12, 8, 0.9);
+    margin-bottom: 0.45rem;
+  }
+
+  .route-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(124, 255, 122, 0.18), rgba(124, 255, 122, 0.38));
+  }
+
+  .node {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--phosphor-muted);
+    font-size: 0.72rem;
+    background: var(--screen-soft);
+    padding: 0 0.1rem;
+  }
+
+  .node.reached {
+    color: var(--phosphor);
+  }
+
+  .node.current {
+    color: var(--amber);
+    font-weight: 700;
+  }
+
+  .node.end {
+    transform: translate(-100%, -50%);
+  }
+
+  .route-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    color: var(--phosphor-dim);
+    font-size: 0.78rem;
   }
 
   .log-list {
@@ -87,5 +191,12 @@ const posts = (await getCollection('blog')).sort(
   .desc {
     color: var(--phosphor-dim);
     font-size: 0.88rem;
+  }
+
+  @media (min-width: 760px) {
+    .route-meta {
+      flex-direction: row;
+      justify-content: space-between;
+    }
   }
 </style>
