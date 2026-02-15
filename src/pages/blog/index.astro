@@ -1,196 +1,272 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import SiteShell from "../../layouts/SiteShell.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 
-const posts = (await getCollection('blog')).sort(
+const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const checkpoints = [
-  'Santa Monica',
-  'Los Angeles',
-  'San Bernardino',
-  'Kingman',
-  'Seligman',
-  'Flagstaff',
-  'Gallup',
-  'Albuquerque',
+  "Santa Monica",
+  "Los Angeles",
+  "San Bernardino",
+  "Kingman",
+  "Seligman",
+  "Flagstaff",
+  "Gallup",
+  "Albuquerque",
 ];
 
 const totalLegs = checkpoints.length - 1;
 const completedLegs = Math.min(posts.length, totalLegs);
 const progressPercent = Math.round((completedLegs / totalLegs) * 100);
-const currentStop = checkpoints[Math.min(completedLegs, checkpoints.length - 1)];
-const nextStop = checkpoints[Math.min(completedLegs + 1, checkpoints.length - 1)];
-const routeNodes = checkpoints.map((stop, i) => {
-  const pct = (i / totalLegs) * 100;
-  const reached = i <= completedLegs;
-  const nodeClass = `node${reached ? ' reached' : ''}${i === completedLegs ? ' current' : ''}${i === checkpoints.length - 1 ? ' end' : ''}`;
-  const label = i === 0 ? 'SM' : i === checkpoints.length - 1 ? 'ABQ' : '•';
-  return { stop, pct, nodeClass, label };
-});
+const currentStop =
+  checkpoints[Math.min(completedLegs, checkpoints.length - 1)];
+const nextStop =
+  checkpoints[Math.min(completedLegs + 1, checkpoints.length - 1)];
+const hasArrived = completedLegs >= totalLegs;
+const currentPosition = hasArrived
+  ? `At ${checkpoints[checkpoints.length - 1]}`
+  : `Between ${currentStop} and ${nextStop}`;
+
+const meterWidth = 32;
+const filledCells = Math.round((progressPercent / 100) * meterWidth);
+const asciiMeter = `[${"#".repeat(filledCells)}${".".repeat(meterWidth - filledCells)}]`;
+const stopSegments = checkpoints.map((stop, index) => `${index + 1}.${stop}`);
+const routeLegendRows = [];
+for (let i = 0; i < stopSegments.length; i += 3) {
+  routeLegendRows.push(stopSegments.slice(i, i + 3).join(" -> "));
+}
+const routeLegend = routeLegendRows.join("\n       ");
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <BaseHead title={`${SITE_TITLE} · Trail Log`} description={SITE_DESCRIPTION} />
-  </head>
-  <body>
-    <Header />
-    <main>
-      <p class="terminal-label">ROUTE 66 DOS TERMINAL</p>
-      <h1>TRAIL LOG INDEX</h1>
-      <p class="intro">Select a stop entry to continue.</p>
+<SiteShell
+  title={`${SITE_TITLE} | Trail Log`}
+  description={SITE_DESCRIPTION}
+  screenLabel="ROUTE 66 EXPEDITION // DAYBOOK INDEX"
+>
+  <section class="terminal-panel intro-panel">
+    <p class="terminal-label">COMMAND</p>
+    <h1>TRAIL JOURNAL</h1>
+    <p class="intro-copy">Select an entry to continue along the road.</p>
+  </section>
 
-      <section class="route-graph">
-        <p class="route-title">SANTA MONICA → ABQ PROGRESS MAP</p>
-        <div class="route-line" aria-label="Route 66 progress from Santa Monica to Albuquerque">
-          <div class="route-fill" style={`width: ${progressPercent}%`}></div>
-          {
-            routeNodes.map((node) => (
-              <span class={node.nodeClass} style={`left: ${node.pct}%`} title={node.stop}>
-                {node.label}
-              </span>
-            ))
-          }
+  <section class="terminal-panel ascii-panel" aria-label="Trail status chart">
+    <p class="terminal-label">TRAIL STATUS</p>
+    <div class="trail-dashboard">
+      <dl class="status-grid">
+        <div>
+          <dt>Trail Start</dt>
+          <dd>Santa Monica</dd>
         </div>
-        <div class="route-meta">
-          <span>NOW: {currentStop}</span>
-          <span>NEXT: {nextStop}</span>
-          <span>{progressPercent}% COMPLETE</span>
+        <div>
+          <dt>Destination</dt>
+          <dd>Albuquerque</dd>
         </div>
-      </section>
+        <div>
+          <dt>Current Position</dt>
+          <dd>{currentPosition}</dd>
+        </div>
+        <div>
+          <dt>Next Stop</dt>
+          <dd>{hasArrived ? "Camp Established" : nextStop}</dd>
+        </div>
+      </dl>
 
-      <ul class="log-list">
-        {
-          posts.map((post) => (
-            <li>
-              <a href={`/blog/${post.id}/`}>
-                <span class="title">{post.data.title}</span>
-                <span class="date"><FormattedDate date={post.data.pubDate} /></span>
-                <span class="desc">{post.data.description}</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </main>
-  </body>
-</html>
+      <div class="progress-block" aria-label="Trip progress">
+        <p class="progress-meta">Progress {progressPercent}%</p>
+        <pre class="progress-meter">{asciiMeter} {progressPercent}%</pre>
+      </div>
+
+      <pre class="ascii-chart">LEGS: {completedLegs}/{totalLegs}
+ROUTE:
+{routeLegend}</pre>
+    </div>
+  </section>
+
+  <ul class="post-list">
+    {
+      posts.map((post) => (
+        <li>
+          <a class="post-card" href={`/blog/${post.id}/`}>
+            <p class="terminal-label">LOG ENTRY</p>
+            <p class="post-card__title">{post.data.title}</p>
+            <p class="post-card__date">
+              <FormattedDate date={post.data.pubDate} />
+            </p>
+            <p class="post-card__desc">{post.data.description}</p>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</SiteShell>
 
 <style>
-  .intro {
-    color: var(--phosphor-dim);
-    margin-bottom: 0.8rem;
+  .intro-panel {
+    margin-bottom: 0.9rem;
   }
 
-  .route-graph {
-    border: 1px solid var(--frame);
-    padding: 0.6rem;
-    margin: 0 0 0.9rem;
-    background: rgba(18, 28, 18, 0.95);
+  .intro-copy {
+    margin: 0;
+    color: var(--crt-dim);
   }
 
-  .route-title {
-    margin: 0 0 0.5rem;
-    color: var(--amber);
-    font-size: 0.82rem;
-    letter-spacing: 0.04em;
+  .ascii-panel {
+    margin-bottom: 1rem;
   }
 
-  .route-line {
-    position: relative;
-    height: 18px;
-    border: 1px solid var(--frame);
-    background: rgba(8, 12, 8, 0.9);
-    margin-bottom: 0.45rem;
+  .trail-dashboard {
+    display: grid;
+    gap: 0.7rem;
   }
 
-  .route-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(124, 255, 122, 0.18), rgba(124, 255, 122, 0.38));
+  .status-grid {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem 0.7rem;
+    border: 1px solid var(--frame-edge);
+    background: var(--panel-bg);
+    padding: 0.65rem;
   }
 
-  .node {
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--phosphor-muted);
+  .status-grid div {
+    min-width: 0;
+  }
+
+  .status-grid dt {
+    margin: 0;
+    color: var(--crt-dim);
     font-size: 0.72rem;
-    background: var(--screen-soft);
-    padding: 0 0.1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .node.reached {
-    color: var(--phosphor);
+  .status-grid dd {
+    margin: 0.25rem 0 0;
+    font-size: 0.83rem;
+    line-height: 1.5;
   }
 
-  .node.current {
-    color: var(--amber);
-    font-weight: 700;
+  .progress-block {
+    border: 1px solid var(--frame-edge);
+    background: var(--panel-bg);
+    padding: 0.65rem;
   }
 
-  .node.end {
-    transform: translate(-100%, -50%);
+  .progress-meta {
+    margin: 0 0 0.45rem;
+    color: var(--crt-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
-  .route-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    color: var(--phosphor-dim);
-    font-size: 0.78rem;
+  .progress-meter {
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--crt);
   }
 
-  .log-list {
+  .ascii-chart {
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    background: var(--panel-bg);
+    border: 1px solid var(--frame-edge);
+    color: var(--crt);
+    padding: 0.7rem;
+  }
+
+  .post-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.45rem;
+    gap: 0.6rem;
   }
 
-  .log-list li a {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.2rem;
-    border: 1px solid var(--frame);
-    background: rgba(18, 28, 18, 0.95);
-    padding: 0.55rem;
-    color: inherit;
+  .post-card {
+    display: block;
+    border: 1px solid var(--frame-edge);
+    background: var(--panel-bg);
     text-decoration: none;
+    color: inherit;
+    padding: 0.7rem;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: card-enter 260ms ease-out forwards;
   }
 
-  .log-list li a:hover {
-    border-color: var(--phosphor-dim);
-    box-shadow: inset 0 0 0 1px rgba(124, 255, 122, 0.2);
+  .post-list li:nth-child(1) .post-card {
+    animation-delay: 70ms;
   }
 
-  .title {
-    font-weight: 700;
+  .post-list li:nth-child(2) .post-card {
+    animation-delay: 140ms;
   }
 
-  .date {
-    font-size: 0.82rem;
-    color: var(--phosphor-dim);
+  .post-list li:nth-child(3) .post-card {
+    animation-delay: 210ms;
   }
 
-  .desc {
-    color: var(--phosphor-dim);
-    font-size: 0.88rem;
+  .post-list li:nth-child(n + 4) .post-card {
+    animation-delay: 280ms;
   }
 
-  @media (min-width: 760px) {
-    .route-meta {
-      flex-direction: row;
-      justify-content: space-between;
+  .post-card:hover {
+    border-color: var(--crt-dim);
+    box-shadow: inset 0 0 0 1px rgba(174, 255, 128, 0.2);
+  }
+
+  .post-card__title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+  }
+
+  .post-card__date {
+    margin: 0 0 0.35rem;
+    color: var(--crt-dim);
+    font-size: 0.86rem;
+  }
+
+  .post-card__desc {
+    margin: 0;
+    color: var(--crt-dim);
+  }
+
+  @keyframes card-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 620px) {
+    .status-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .progress-meter {
+      white-space: pre-wrap;
+      overflow-x: visible;
+    }
+
+    .ascii-chart {
+      white-space: pre-wrap;
+      overflow-x: visible;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-card {
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
   }
 </style>
