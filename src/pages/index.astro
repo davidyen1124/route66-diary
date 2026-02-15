@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
@@ -107,7 +106,6 @@ const nextStop = checkpoints[Math.min(currentIndex + 1, checkpoints.length - 1)]
         </ul>
       </section>
     </main>
-    <Footer />
   </body>
 </html>
 
