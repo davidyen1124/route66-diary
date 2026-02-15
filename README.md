@@ -1,4 +1,4 @@
-# Route 66 Diary (Astro + Cloudflare Pages)
+# Route 66 Diary (Astro + Cloudflare)
 
 Mobile-first retro blog inspired by early-2000s Microsoft Road Trip software.
 
@@ -11,6 +11,7 @@ The first stop is already logged with coordinates:
 
 - Astro 5
 - Astro Content Collections
+- `@astrojs/cloudflare` adapter
 - Wrangler for Cloudflare deployment
 
 ## Local development
@@ -26,12 +27,12 @@ npm run dev
 npm run build
 ```
 
-## Deploy to Cloudflare Pages (Wrangler)
+## Deploy to Cloudflare (Wrangler)
 
 You said Wrangler auth is already done, so deploy is:
 
 ```bash
-npx wrangler pages deploy dist --project-name route66-diary
+npx wrangler deploy
 ```
 
 Or use the convenience script:
@@ -46,7 +47,7 @@ npm run deploy
 - `src/pages/blog/index.astro` — stop log list
 - `src/content/blog/day-*.md` — diary entries
 - `src/layouts/BlogPost.astro` — stop entry template
-- `astro.config.mjs` + `wrangler.toml` — Cloudflare Pages deployment config
+- `astro.config.mjs` + `wrangler.toml` — Cloudflare deployment config
 
 ## Add a new stop
 

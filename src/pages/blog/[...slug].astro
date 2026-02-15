@@ -2,19 +2,30 @@
 import { getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 
-export async function getStaticPaths() {
-  const posts = await getCollection('blog');
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: { post },
-  }));
+const slug = Astro.params.slug;
+const post = (await getCollection('blog')).find((entry) => entry.id === slug);
+
+if (!post) {
+  Astro.response.status = 404;
 }
 
-const { post } = Astro.props;
-const rendered = await render(post);
+const rendered = post ? await render(post) : null;
 const Content = rendered?.Content;
 ---
 
-<BlogPost {...post.data}>
-  <Content />
-</BlogPost>
+{
+  post && Content ? (
+    <BlogPost {...post.data}>
+      <Content />
+    </BlogPost>
+  ) : (
+    <BlogPost
+      title="Stop not found"
+      description="This route stop could not be found."
+      pubDate={new Date()}
+    >
+      <p>Could not find that Route 66 stop entry.</p>
+      <p><a href="/blog">Back to stop log</a></p>
+    </BlogPost>
+  )
+}
