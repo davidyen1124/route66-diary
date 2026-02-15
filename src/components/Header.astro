@@ -1,0 +1,73 @@
+---
+import { SITE_TITLE } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+---
+
+<header>
+  <nav>
+    <a class="logo" href="/">🗺️ {SITE_TITLE}</a>
+    <div class="internal-links">
+      <HeaderLink href="/">Dashboard</HeaderLink>
+      <HeaderLink href="/blog">Stops</HeaderLink>
+      <HeaderLink href="/about">About</HeaderLink>
+    </div>
+  </nav>
+</header>
+
+<style>
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(180deg, #173b7a, #0f2854);
+    border-bottom: 3px solid #ffd24a;
+    box-shadow: 0 3px 0 #0a1429;
+  }
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .logo {
+    color: #ffef9f;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .internal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .internal-links a {
+    border: 2px solid #0a1429;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffe071, #ffbf2f);
+    color: #091325;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.35rem 0.8rem;
+    text-decoration: none;
+    box-shadow: inset 0 1px 0 #fff8cb, 0 2px 0 #9f6d00;
+  }
+
+  .internal-links a.active {
+    background: linear-gradient(180deg, #f7fcff, #dbefff);
+    box-shadow: inset 0 1px 0 #fff, 0 2px 0 #3e5e8b;
+  }
+
+  @media (min-width: 760px) {
+    nav {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+  }
+</style>

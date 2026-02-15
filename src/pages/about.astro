@@ -1,0 +1,46 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title="About This Trip" description="Why this retro Route 66 diary exists" />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <article class="about-card">
+        <h1>About This Trip</h1>
+
+        <p>
+          This is David’s Route 66 diary from Santa Monica to Albuquerque — part travel log, part
+          questionable life decisions, all documented in glorious retro-road-software style.
+        </p>
+
+        <p>
+          The vibe is intentionally early-2000s map program energy, but mobile-first so updates can
+          be posted from airport gates, hotel lobbies, parking lots, and anywhere with enough
+          signal to send a sentence.
+        </p>
+
+        <p>
+          Every stop gets a dated entry with what actually happened: the plan, the detours, the
+          food, and the occasional chaotic plot twist. If it’s in here, it happened (or at least
+          felt true at the time).
+        </p>
+      </article>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .about-card {
+    border: 2px solid #8db4ff;
+    background: #fff;
+    padding: 0.9rem;
+  }
+</style>

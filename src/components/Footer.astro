@@ -1,0 +1,25 @@
+---
+const today = new Date();
+---
+
+<footer>
+  <p>© {today.getFullYear()} David Yen · Route 66 Diary</p>
+  <p class="note">Built with Astro + Cloudflare Workers</p>
+</footer>
+
+<style>
+  footer {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    text-align: center;
+    background: #f5f7fb;
+    color: #3a4b66;
+    border-top: 1px solid #d7deea;
+    font-size: 0.85rem;
+  }
+
+  .note {
+    margin-top: 0.2rem;
+    color: #5a6d8f;
+  }
+</style>
