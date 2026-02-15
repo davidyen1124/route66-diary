@@ -20,12 +20,12 @@ const Content = rendered?.Content;
     </BlogPost>
   ) : (
     <BlogPost
-      title="Stop not found"
-      description="This route stop could not be found."
+      title="Trail entry not found"
+      description="That post could not be located."
       pubDate={new Date()}
     >
-      <p>Could not find that Route 66 stop entry.</p>
-      <p><a href="/blog">Back to stop log</a></p>
+      <p>This trail entry does not exist.</p>
+      <p><a href="/blog">Return to trail log index</a></p>
     </BlogPost>
   )
 }

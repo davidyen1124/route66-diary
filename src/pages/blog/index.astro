@@ -13,21 +13,24 @@ const posts = (await getCollection('blog')).sort(
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={`${SITE_TITLE} · Stops`} description={SITE_DESCRIPTION} />
+    <BaseHead title={`${SITE_TITLE} · Trail Log`} description={SITE_DESCRIPTION} />
   </head>
   <body>
     <Header />
     <main>
-      <ul class="cards">
+      <p class="terminal-label">ROUTE 66 DOS TERMINAL</p>
+      <h1>TRAIL LOG INDEX</h1>
+      <p class="intro">Select a stop entry to continue.</p>
+
+      <ul class="log-list">
         {
-          posts.map((post) => (
+          posts.map((post, i) => (
             <li>
               <a href={`/blog/${post.id}/`}>
-                <h2>{post.data.title}</h2>
-                <p class="date">
-                  <FormattedDate date={post.data.pubDate} />
-                </p>
-                <p>{post.data.description}</p>
+                <span class="prompt">{`[${String(i + 1).padStart(2, '0')}] >`}</span>
+                <span class="title">{post.data.title}</span>
+                <span class="date"><FormattedDate date={post.data.pubDate} /></span>
+                <span class="desc">{post.data.description}</span>
               </a>
             </li>
           ))
@@ -38,36 +41,51 @@ const posts = (await getCollection('blog')).sort(
 </html>
 
 <style>
-  .cards {
+  .intro {
+    color: var(--phosphor-dim);
+    margin-bottom: 0.8rem;
+  }
+
+  .log-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.65rem;
+    gap: 0.45rem;
   }
 
-  .cards li a {
-    display: block;
-    border: 2px solid #8db4ff;
-    background: #fff;
-    padding: 0.8rem;
-    text-decoration: none;
+  .log-list li a {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+    border: 1px solid var(--frame);
+    background: rgba(18, 28, 18, 0.95);
+    padding: 0.55rem;
     color: inherit;
+    text-decoration: none;
   }
 
-  .cards li a:hover {
-    border-color: #2f67bd;
-    transform: translateY(-1px);
+  .log-list li a:hover {
+    border-color: var(--phosphor-dim);
+    box-shadow: inset 0 0 0 1px rgba(124, 255, 122, 0.2);
   }
 
-  .cards h2 {
-    font-size: 1.05rem;
-    margin-bottom: 0.3rem;
+  .prompt {
+    color: var(--amber);
+    font-size: 0.8rem;
+  }
+
+  .title {
+    font-weight: 700;
   }
 
   .date {
-    color: #355a96;
     font-size: 0.82rem;
-    margin-bottom: 0.35rem;
+    color: var(--phosphor-dim);
+  }
+
+  .desc {
+    color: var(--phosphor-dim);
+    font-size: 0.88rem;
   }
 </style>

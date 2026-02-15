@@ -6,39 +6,35 @@ import Header from '../components/Header.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const {
-  title,
-  description,
-  pubDate,
-  updatedDate,
-} = Astro.props;
+const { title, description, pubDate, updatedDate } = Astro.props;
 ---
 
 <html lang="en">
   <head>
     <BaseHead title={title} description={description} />
   </head>
-
   <body>
     <Header />
     <main>
       <article class="entry">
-        <div class="title">
-          <p class="date">
-            <FormattedDate date={pubDate} />
-            {
-              updatedDate && (
-                <span class="last-updated">
-                  · Updated <FormattedDate date={updatedDate} />
-                </span>
-              )
-            }
-          </p>
-          <h1>{title}</h1>
-        </div>
+        <p class="terminal-label">TRAIL ENTRY</p>
+        <h1>{title}</h1>
+        <p class="meta">
+          <span>DATE: <FormattedDate date={pubDate} /></span>
+          {
+            updatedDate && (
+              <span class="updated"> · UPDATED: <FormattedDate date={updatedDate} /></span>
+            )
+          }
+        </p>
+
         <div class="prose">
           <slot />
         </div>
+
+        <p class="back">
+          <a href="/blog">&larr; Back to trail log</a>
+        </p>
       </article>
     </main>
   </body>
@@ -46,26 +42,34 @@ const {
 
 <style>
   .entry {
-    border: 2px solid #8db4ff;
-    background: #fff;
-    padding: 0.9rem;
+    border: 1px solid var(--frame);
+    background: rgba(14, 20, 14, 0.96);
+    padding: 0.8rem;
   }
 
-  .title h1 {
-    margin-bottom: 0.5rem;
+  .meta {
+    color: var(--phosphor-dim);
+    margin-bottom: 0.8rem;
+    font-size: 0.86rem;
   }
 
-  .date {
-    color: #355a96;
-    margin-bottom: 0.3rem;
-    font-size: 0.9rem;
-  }
-
-  .last-updated {
-    color: #5a79ad;
+  .updated {
+    color: var(--amber);
   }
 
   .prose {
-    font-size: 1rem;
+    font-size: 0.97rem;
+  }
+
+  .prose :global(p) {
+    margin-bottom: 0.9rem;
+  }
+
+  .prose :global(strong) {
+    color: var(--amber);
+  }
+
+  .back {
+    margin-top: 1rem;
   }
 </style>

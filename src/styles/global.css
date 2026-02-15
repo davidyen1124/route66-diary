@@ -1,58 +1,55 @@
 :root {
-  --accent: #ffd24a;
-  --accent-dark: #cc8f00;
-  --black: 10, 20, 40;
-  --gray: 110, 138, 190;
-  --gray-light: 222, 233, 255;
-  --gray-dark: 23, 40, 78;
-  --panel: #f7fbff;
-  --road-navy: #1b3f7d;
-  --road-blue: #2f67bd;
-  --box-shadow: 0 3px 0 rgba(6, 16, 32, 0.9), 0 10px 24px rgba(7, 20, 44, 0.35);
-}
-
-@font-face {
-  font-family: 'Atkinson';
-  src: url('/fonts/atkinson-regular.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Atkinson';
-  src: url('/fonts/atkinson-bold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+  --screen: #0a0f0a;
+  --screen-soft: #101710;
+  --phosphor: #7cff7a;
+  --phosphor-dim: #4fb84d;
+  --phosphor-muted: #2e7a2d;
+  --amber: #ffb347;
+  --frame: #2f5f2f;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  font-family: 'Atkinson', 'Trebuchet MS', system-ui, sans-serif;
-  color: rgb(var(--gray-dark));
-  line-height: 1.5;
-  background:
-    radial-gradient(circle at 10% -10%, #7eb4ff 0, #7eb4ff 18%, transparent 19%),
-    radial-gradient(circle at 90% -10%, #ffe071 0, #ffe071 17%, transparent 18%),
-    linear-gradient(180deg, #3f78d4, #274f9d 35%, #17346f 100%);
+  padding: 0;
+}
+
+body {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--phosphor);
+  background:
+    radial-gradient(circle at 50% -20%, rgba(124, 255, 122, 0.07), transparent 50%),
+    var(--screen);
+  line-height: 1.5;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03) 0,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.22;
 }
 
 main {
-  width: min(920px, 100% - 1.2rem);
-  margin: 0.8rem auto 0;
-  padding: 0.8rem;
-  border: 3px solid #0c2248;
-  background: linear-gradient(180deg, #f7fbff, #e9f2ff);
-  box-shadow: var(--box-shadow);
-  flex: 1 0 auto;
+  width: min(920px, calc(100% - 1.2rem));
+  margin: 0.8rem auto;
+  border: 2px solid var(--frame);
+  background: linear-gradient(180deg, rgba(16, 23, 16, 0.98), rgba(10, 15, 10, 0.98));
+  box-shadow: inset 0 0 0 2px rgba(124, 255, 122, 0.07), 0 0 24px rgba(0, 0, 0, 0.45);
+  padding: 0.9rem;
 }
 
 h1,
@@ -61,97 +58,73 @@ h3,
 h4,
 h5,
 h6 {
-  margin: 0 0 0.6rem;
-  color: rgb(var(--black));
-  line-height: 1.2;
+  margin: 0 0 0.7rem;
+  color: var(--phosphor);
+  letter-spacing: 0.02em;
 }
 
 h1 {
-  font-size: 1.8rem;
-}
-
-h2 {
   font-size: 1.35rem;
 }
 
-h3 {
-  font-size: 1.15rem;
-}
-
-a {
-  color: #123f8f;
-}
-
-a:hover {
-  color: #0c2e68;
+h2 {
+  font-size: 1.08rem;
 }
 
 p {
   margin: 0 0 0.9rem;
 }
 
-ul {
-  padding-left: 1rem;
+a {
+  color: var(--amber);
+  text-decoration: none;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
+a:hover {
+  text-decoration: underline;
+}
+
+ul {
+  margin: 0;
+  padding-left: 1rem;
 }
 
 code,
 pre {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", Courier, monospace;
 }
 
 code {
-  background: #d6e7ff;
-  border: 1px solid #aac8f8;
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
+  color: var(--amber);
 }
 
 pre {
-  padding: 0.9rem;
-  border-radius: 8px;
   overflow-x: auto;
-  background: #0b203f;
-  color: #dbe9ff;
-}
-
-blockquote {
-  margin: 0 0 1rem;
-  padding: 0.6rem 0.8rem;
-  border-left: 4px solid var(--accent-dark);
-  background: #fff7db;
+  border: 1px solid var(--frame);
+  padding: 0.75rem;
+  background: var(--screen);
 }
 
 hr {
-  border: none;
-  border-top: 2px dashed #8db4ff;
+  border: 0;
+  border-top: 1px dashed var(--frame);
   margin: 1rem 0;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+.terminal-label {
+  color: var(--phosphor-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
 }
 
 @media (min-width: 760px) {
-  h1 {
-    font-size: 2.2rem;
+  main {
+    margin-top: 1rem;
+    padding: 1rem;
   }
 
-  main {
-    margin-top: 1.2rem;
-    padding: 1.1rem;
+  h1 {
+    font-size: 1.55rem;
   }
 }
