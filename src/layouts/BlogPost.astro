@@ -106,6 +106,102 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
               const L = window.L;
               if (!L) return;
 
+              const toRad = (deg) => (deg * Math.PI) / 180;
+              const haversineMeters = (a, b) => {
+                const R = 6371000;
+                const dLat = toRad(b[0] - a[0]);
+                const dLng = toRad(b[1] - a[1]);
+                const lat1 = toRad(a[0]);
+                const lat2 = toRad(b[0]);
+                const sinDLat = Math.sin(dLat / 2);
+                const sinDLng = Math.sin(dLng / 2);
+                const h = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLng * sinDLng;
+                return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+              };
+
+              const mulberry32 = (seed) => {
+                let t = seed >>> 0;
+                return () => {
+                  t += 0x6d2b79f5;
+                  let x = Math.imul(t ^ (t >>> 15), 1 | t);
+                  x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+                  return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+                };
+              };
+
+              const seedFromPair = (a, b, idx) => {
+                const n = (v) => Math.round((v + 180) * 1e6);
+                let s = 2166136261;
+                const mix = (x) => {
+                  s ^= x;
+                  s = Math.imul(s, 16777619);
+                };
+                mix(n(a[0]));
+                mix(n(a[1]));
+                mix(n(b[0]));
+                mix(n(b[1]));
+                mix(idx + 1);
+                return s >>> 0;
+              };
+
+              // Builds a "driving-like" path by inserting gently wiggly intermediate points.
+              // Deterministic per segment (no jitter changes between reloads).
+              const buildDrivingPath = (latLngs) => {
+                if (!Array.isArray(latLngs) || latLngs.length < 2) return latLngs || [];
+                const out = [latLngs[0]];
+                for (let i = 0; i < latLngs.length - 1; i++) {
+                  const a = latLngs[i];
+                  const b = latLngs[i + 1];
+                  const dist = haversineMeters(a, b);
+
+                  // Short hops look fine as straight segments.
+                  if (!Number.isFinite(dist) || dist < 1200) {
+                    out.push(b);
+                    continue;
+                  }
+
+                  // Project to a local-ish meters space (equirectangular) for stable perpendicular offsets.
+                  const lat0 = toRad((a[0] + b[0]) / 2);
+                  const metersPerDegLat = 111132.92;
+                  const metersPerDegLng = Math.max(1e-6, 111412.84 * Math.cos(lat0));
+                  const ax = a[1] * metersPerDegLng;
+                  const ay = a[0] * metersPerDegLat;
+                  const bx = b[1] * metersPerDegLng;
+                  const by = b[0] * metersPerDegLat;
+                  const dx = bx - ax;
+                  const dy = by - ay;
+                  const segLen = Math.hypot(dx, dy) || 1;
+                  const px = -dy / segLen;
+                  const py = dx / segLen;
+
+                  const rand = mulberry32(seedFromPair(a, b, i));
+                  const steps = Math.max(6, Math.min(22, Math.round(dist / 18000) + 6));
+                  const turns = 1 + Math.floor(rand() * 3); // 1..3
+                  const phase = rand() * Math.PI * 2;
+                  // Keep it subtle: a few hundred meters on short hops, up to a few km on long legs.
+                  const amplitude = Math.min(4000, Math.max(150, dist * (0.015 + rand() * 0.02)));
+
+                  for (let j = 1; j < steps; j++) {
+                    const t = j / steps;
+                    const baseX = ax + dx * t;
+                    const baseY = ay + dy * t;
+
+                    // Ease in/out so endpoints stay anchored at the true points.
+                    const ease = Math.sin(Math.PI * t);
+                    const wiggle = Math.sin(phase + t * Math.PI * 2 * turns);
+                    const micro = (rand() - 0.5) * 0.12;
+                    const offset = amplitude * ease * (wiggle + micro);
+
+                    const x = baseX + px * offset;
+                    const y = baseY + py * offset;
+                    out.push([y / metersPerDegLat, x / metersPerDegLng]);
+                  }
+
+                  out.push(b);
+                }
+                return out;
+              };
+
               const map = L.map(root, {
                 scrollWheelZoom: false,
                 zoomControl: false,
@@ -129,7 +225,7 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
               });
               primaryTile.addTo(map);
 
-              const pathLatLngs = points.map((point) => [point.lat, point.lng]);
+              const pathLatLngs = buildDrivingPath(points.map((point) => [point.lat, point.lng]));
               if (pathLatLngs.length > 1) {
                 L.polyline(pathLatLngs, {
                   color: "#2f4a3d",
@@ -137,6 +233,7 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
                   opacity: 0.85,
                   lineJoin: "round",
                   lineCap: "round",
+                  smoothFactor: 1,
                 }).addTo(map);
               }
 
@@ -153,6 +250,9 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
                   .bindPopup(point.label);
                 bounds.push([point.lat, point.lng]);
               }
+
+              // Ensure the line stays in view even when it's slightly wiggly.
+              for (const p of pathLatLngs) bounds.push(p);
 
               if (bounds.length === 1) {
                 map.setView(bounds[0], 11);
