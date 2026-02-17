@@ -1,4 +1,15 @@
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("/fonts/press-start-2p.ttf") format("truetype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 :root {
+  --font-oregon: "Press Start 2P", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
   --sky-top: #243852;
   --sky-mid: #4b6282;
   --ground: #6d4c39;
@@ -22,16 +33,16 @@
   --radius-1: 0.6rem;
   --radius-2: 0.9rem;
 
-  --font-body: "Iowan Old Style", "Baskerville", "Palatino Linotype", serif;
-  --font-display: "Rockwell", "American Typewriter", serif;
-  --font-accent: "Courier New", monospace;
+  --font-body: var(--font-oregon);
+  --font-display: var(--font-oregon);
+  --font-accent: var(--font-oregon);
 
-  --text-xs: clamp(0.78rem, 0.76rem + 0.2vw, 0.86rem);
-  --text-sm: clamp(0.92rem, 0.88rem + 0.28vw, 1rem);
-  --text-base: clamp(1rem, 0.96rem + 0.34vw, 1.1rem);
-  --text-lg: clamp(1.18rem, 1.08rem + 0.62vw, 1.36rem);
-  --text-xl: clamp(1.36rem, 1.2rem + 1.06vw, 1.72rem);
-  --text-2xl: clamp(1.58rem, 1.36rem + 1.45vw, 2.04rem);
+  --text-xs: clamp(0.7rem, 0.68rem + 0.2vw, 0.78rem);
+  --text-sm: clamp(0.82rem, 0.8rem + 0.28vw, 0.9rem);
+  --text-base: clamp(0.9rem, 0.86rem + 0.34vw, 1rem);
+  --text-lg: clamp(1.04rem, 0.96rem + 0.62vw, 1.22rem);
+  --text-xl: clamp(1.2rem, 1.06rem + 1.06vw, 1.54rem);
+  --text-2xl: clamp(1.38rem, 1.18rem + 1.45vw, 1.84rem);
 
   --meta-letter-spacing: 0.04em;
 
