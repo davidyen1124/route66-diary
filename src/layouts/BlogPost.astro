@@ -55,7 +55,7 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
     <p class="meta">
       <FormattedDate date={pubDate} />
       <span> · </span>
-      <strong class="meta-location">{locationLabel}</strong>
+      <span class="meta-location">{locationLabel}</span>
     </p>
 
     {weather && <p class="meta">{weather}</p>}
@@ -173,8 +173,7 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
 
 <style>
   .entry {
-    max-width: 48rem;
-    margin: 0 auto;
+    width: 100%;
   }
 
   .top-back {
@@ -192,13 +191,8 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
   }
 
   .meta-location {
-    display: inline-block;
-    font-family: inherit;
-    font-weight: 900;
+    font: inherit;
     color: inherit;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: inherit;
   }
 
   .prose :global(p),
