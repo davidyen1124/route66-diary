@@ -76,11 +76,12 @@ Optional map/weather fields:
 ```md
 weather: "Mostly clear"
 mapPointHints:
-  - "Stop name, state"
-mapPoints:
-  - label: "Stop name, state"
-    latitude: 35.0
-    longitude: -115.0
+
+- "Stop name, state"
+  mapPoints:
+- label: "Stop name, state"
+  latitude: 35.0
+  longitude: -115.0
 ```
 
 If only `mapPointHints` are present, run the enrichment script below to generate `mapPoints`.

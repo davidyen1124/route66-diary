@@ -7,7 +7,8 @@
 }
 
 :root {
-  --font-oregon: "Press Start 2P", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+  --font-oregon:
+    "Press Start 2P", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 
   --sky-top: #243852;
@@ -168,7 +169,8 @@ pre {
       rgba(71, 97, 132, 0.2) 100%
     ),
     var(--trail-bg) center / cover no-repeat;
-  filter: saturate(0.82) contrast(0.9);
+  filter: blur(2px) saturate(0.82) contrast(0.9);
+  transform: scale(1.02);
 }
 
 .site-shell {
