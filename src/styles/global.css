@@ -56,7 +56,13 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.6;
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 35%, var(--ground) 72%, var(--ground-deep) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 35%,
+    var(--ground) 72%,
+    var(--ground-deep) 100%
+  );
 }
 
 a {
@@ -136,7 +142,11 @@ pre {
   padding: var(--space-4);
   border: 2px solid color-mix(in srgb, var(--border) 80%, #2f2018 20%);
   border-radius: var(--radius-2);
-  background: linear-gradient(to bottom, rgba(250, 241, 219, 0.95), rgba(240, 227, 193, 0.97));
+  background: linear-gradient(
+    to bottom,
+    rgba(250, 241, 219, 0.95),
+    rgba(240, 227, 193, 0.97)
+  );
   box-shadow: 0 10px 24px var(--shadow);
 }
 
@@ -152,7 +162,11 @@ pre {
 .journal-card {
   border: 1px solid color-mix(in srgb, var(--border) 82%, #2f2018 18%);
   border-radius: var(--radius-1);
-  background: linear-gradient(to bottom, rgba(255, 250, 235, 0.95), rgba(246, 235, 208, 0.95));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 250, 235, 0.95),
+    rgba(246, 235, 208, 0.95)
+  );
   box-shadow: inset 0 0 0 1px rgba(255, 252, 242, 0.35);
   padding: var(--space-4);
 }
