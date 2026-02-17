@@ -1,75 +1,261 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import Header from '../components/Header.astro';
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "../components/FormattedDate.astro";
+import SiteShell from "./SiteShell.astro";
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, pubDate, updatedDate } = Astro.props;
+const { title, description, pubDate, city, state, weather, latitude, longitude, mapPoints: frontmatterMapPoints = [] } = Astro.props as Props;
+const locationLabel = city && state ? `${city}, ${state}` : "Unknown stop";
+
+type MapPoint = { key: string; label: string; lat: number; lng: number };
+
+const PRESET_CITY_POINTS: Record<string, Omit<MapPoint, "key">> = {
+  "Los Angeles, CA": { label: "Los Angeles, CA", lat: 34.05224, lng: -118.24368 },
+  "Barstow, CA": { label: "Barstow, CA", lat: 34.8958, lng: -117.01728 },
+  "Needles, CA": { label: "Needles, CA", lat: 34.84806, lng: -114.61413 },
+  "Kingman, AZ": { label: "Kingman, AZ", lat: 35.18944, lng: -114.05301 },
+};
+
+const markerByCoords = new Map<string, MapPoint>();
+const addPoint = (label: string, lat: number, lng: number) => {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+  const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+  markerByCoords.set(key, { key, label, lat, lng });
+};
+
+if (Array.isArray(frontmatterMapPoints) && frontmatterMapPoints.length > 0) {
+  for (const point of frontmatterMapPoints) {
+    addPoint(point.label, point.latitude, point.longitude);
+  }
+} else if (typeof latitude === "number" && typeof longitude === "number") {
+  addPoint(locationLabel, latitude, longitude);
+}
+
+const placeContext = [city, state].filter(Boolean).join(", ");
+if (markerByCoords.size === 0 && placeContext) {
+  const preset = PRESET_CITY_POINTS[placeContext];
+  if (preset) addPoint(preset.label, preset.lat, preset.lng);
+}
+
+const mapPoints = Array.from(markerByCoords.values());
+const hasMapLocation = mapPoints.length > 0;
+const showMissingMapFallback = !hasMapLocation && Boolean(placeContext);
+const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
 ---
 
-<html lang="en">
-  <head>
-    <BaseHead title={title} description={description} />
-  </head>
-  <body>
-    <Header />
-    <main>
-      <article class="entry">
-        <p class="terminal-label">TRAIL ENTRY</p>
-        <h1>{title}</h1>
-        <p class="meta">
-          <span>DATE: <FormattedDate date={pubDate} /></span>
-          {
-            updatedDate && (
-              <span class="updated"> · UPDATED: <FormattedDate date={updatedDate} /></span>
-            )
-          }
-        </p>
+<SiteShell title={title} description={description}>
+  <article class="journal-card entry">
+    <p class="back top-back">
+      <a href="/blog">← Back to journal index</a>
+    </p>
 
-        <div class="prose">
-          <slot />
+    <h1>{title}</h1>
+
+    <p class="meta">
+      <FormattedDate date={pubDate} />
+      <span> · </span>
+      <strong class="meta-location">{locationLabel}</strong>
+    </p>
+
+    {weather && <p class="meta">{weather}</p>}
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    {hasMapLocation ? (
+      <section class="entry-map" aria-label={`Map for ${locationLabel}`}>
+        <div class="entry-map__frame">
+          <div class="entry-map__canvas" data-points={mapData}></div>
         </div>
+        <script is:inline>
+          (() => {
+            const script = document.currentScript;
+            const section = script?.closest(".entry-map");
+            const root = section?.querySelector(".entry-map__canvas");
+            if (!root) return;
 
-        <p class="back">
-          <a href="/blog">&larr; Back to trail log</a>
-        </p>
-      </article>
-    </main>
-  </body>
-</html>
+            const points = JSON.parse(root.dataset.points || "[]");
+            if (!Array.isArray(points) || points.length === 0) return;
+
+            const loadCss = (href) => {
+              if (document.querySelector(`link[href="${href}"]`)) return;
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.href = href;
+              document.head.appendChild(link);
+            };
+
+            const loadScript = (src) =>
+              new Promise((resolve, reject) => {
+                if (window.L) return resolve();
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if (existing) {
+                  existing.addEventListener("load", resolve, { once: true });
+                  existing.addEventListener("error", reject, { once: true });
+                  return;
+                }
+                const el = document.createElement("script");
+                el.src = src;
+                el.async = true;
+                el.onload = resolve;
+                el.onerror = reject;
+                document.body.appendChild(el);
+              });
+
+            const render = () => {
+              const L = window.L;
+              if (!L) return;
+
+              const map = L.map(root, {
+                scrollWheelZoom: false,
+                zoomControl: false,
+                attributionControl: false,
+              });
+
+              const primaryTile = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+                maxZoom: 20,
+                subdomains: "abcd",
+              });
+              const fallbackTile = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19,
+              });
+
+              let switchedToFallback = false;
+              primaryTile.once("tileerror", () => {
+                if (switchedToFallback) return;
+                switchedToFallback = true;
+                if (map.hasLayer(primaryTile)) map.removeLayer(primaryTile);
+                fallbackTile.addTo(map);
+              });
+              primaryTile.addTo(map);
+
+              const bounds = [];
+              for (const point of points) {
+                L.circleMarker([point.lat, point.lng], {
+                  radius: 8,
+                  color: "#2f4a3d",
+                  weight: 2,
+                  fillColor: "#d78f4f",
+                  fillOpacity: 0.95,
+                })
+                  .addTo(map)
+                  .bindPopup(point.label);
+                bounds.push([point.lat, point.lng]);
+              }
+
+              if (bounds.length === 1) {
+                map.setView(bounds[0], 11);
+                return;
+              }
+
+              map.fitBounds(bounds, { padding: [28, 28] });
+            };
+
+            loadCss("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+            loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js").then(render).catch(() => {
+              root.innerHTML = '<p style="margin:0;padding:0.75rem;font-size:0.92rem;line-height:1.35;">Map failed to load.</p>';
+            });
+          })();
+        </script>
+      </section>
+      ) : (
+        showMissingMapFallback && (
+          <section class="entry-map entry-map--fallback" aria-label={`Map for ${locationLabel}`}>
+            <p class="entry-map__notice">Map unavailable for this entry right now.</p>
+          </section>
+        )
+      )
+    }
+  </article>
+</SiteShell>
 
 <style>
   .entry {
-    border: 1px solid var(--frame);
-    background: rgba(14, 20, 14, 0.96);
-    padding: 0.8rem;
+    max-width: 48rem;
+    margin: 0 auto;
+  }
+
+  .top-back {
+    margin: 0 0 var(--space-4);
   }
 
   .meta {
-    color: var(--phosphor-dim);
-    margin-bottom: 0.8rem;
-    font-size: 0.86rem;
+    margin: 0 0 var(--space-4);
+    color: var(--pine-soft);
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    line-height: 1.35;
   }
 
-  .updated {
-    color: var(--amber);
+  .meta-location {
+    display: inline-block;
+    font-family: inherit;
+    font-weight: 900;
+    color: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: inherit;
   }
 
-  .prose {
-    font-size: 0.97rem;
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol),
+  .prose :global(pre),
+  .prose :global(blockquote) {
+    margin: 0 0 var(--space-4);
   }
 
-  .prose :global(p) {
-    margin-bottom: 0.9rem;
+  .entry-map {
+    margin-top: var(--space-5);
   }
 
-  .prose :global(strong) {
-    color: var(--amber);
+  .entry-map__frame {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--border) 82%, #2f2018 18%);
+    border-radius: var(--radius-1);
+    background: rgba(255, 250, 235, 0.75);
+    box-shadow: inset 0 0 0 1px rgba(255, 252, 242, 0.35);
+  }
+
+  .entry-map__canvas {
+    width: 100%;
+    height: 14rem;
+  }
+
+  .entry-map--fallback {
+    padding: 0.75rem 0;
+  }
+
+  .entry-map__notice {
+    margin: 0;
+    color: var(--pine-soft);
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    line-height: 1.35;
+  }
+
+  :global(.leaflet-control-attribution) {
+    display: none !important;
+  }
+
+  :global(.leaflet-bottom.leaflet-right) {
+    display: none !important;
   }
 
   .back {
-    margin-top: 1rem;
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+  }
+
+  @media (min-width: 760px) {
+    .entry-map__canvas {
+      height: 17rem;
+    }
   }
 </style>

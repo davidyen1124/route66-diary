@@ -1,0 +1,26 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  screenLabel?: string;
+}
+
+const { title, description, screenLabel } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body>
+    <div class="trail-page">
+      <main class="site-shell">
+        {screenLabel && <p class="screen-label">{screenLabel}</p>}
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

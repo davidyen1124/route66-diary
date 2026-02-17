@@ -2,10 +2,7 @@
 
 Mobile-first retro blog inspired by early-2000s Microsoft Road Trip software.
 
-This site tracks David's Route 66 diary from Santa Monica to Albuquerque.
-The first stop is already logged with coordinates:
-
-- **33.982459, -118.457771** (near Santa Monica)
+This site tracks David's Route 66 diary from Santa Monica to Albuquerque using pre-geocoded `mapPoints` in each entry.
 
 ## Stack
 
@@ -60,11 +57,26 @@ description: "..."
 pubDate: 2026-02-14
 city: "..."
 state: "..."
-latitude: 0.000000
-longitude: 0.000000
+locationSource: "explicit"
+mapPoints:
+  - label: "Exact stop name"
+    latitude: 0
+    longitude: 0
 tags:
   - route-66
 ---
 
 Trip notes here.
 ```
+
+## Coordinate enrichment script
+
+If you only have place names, add a `mapPointHints` array in post frontmatter and run:
+
+```bash
+GEOAPIFY_API_KEY=your_key_here npm run enrich:map-points
+```
+
+The script geocodes with Geoapify autocomplete (`limit=5`, `lang=en`, `filter=countrycode:us`) and picks a deterministic best match, then updates each `src/content/blog/*.md` file with de-duplicated `mapPoints` at content-prep time, so no geocoding happens during page render.
+
+For backward compatibility, `GEOCODE_MAPS_API_KEY` is still accepted if `GEOAPIFY_API_KEY` is not set.

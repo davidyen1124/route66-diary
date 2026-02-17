@@ -1,8 +1,12 @@
-import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
 
 const blog = defineCollection({
-  loader: glob({ base: './src/content/blog', pattern: 'day-*.md' }),
+  loader: glob({
+    base: "./src/content/blog",
+    pattern: "**/*.md",
+    generateId: ({ entry }) => entry.replace(/\.md$/, ""),
+  }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -13,6 +17,18 @@ const blog = defineCollection({
     longitude: z.number().optional(),
     city: z.string().optional(),
     state: z.string().optional(),
+    locationSource: z.enum(["explicit", "inferred"]).optional(),
+    mapPoints: z
+      .array(
+        z.object({
+          label: z.string(),
+          latitude: z.number(),
+          longitude: z.number(),
+        }),
+      )
+      .optional(),
+    mapPointHints: z.array(z.string()).optional(),
+    weather: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),
 });

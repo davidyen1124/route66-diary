@@ -1,9 +1,10 @@
 ---
-import { getCollection, render } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import { getCollection, render } from "astro:content";
+import BlogPost from "../../layouts/BlogPost.astro";
 
-const slug = Astro.params.slug;
-const post = (await getCollection('blog')).find((entry) => entry.id === slug);
+const rawSlug = Astro.params.slug;
+const slug = Array.isArray(rawSlug) ? rawSlug.join("/") : rawSlug;
+const post = (await getCollection("blog")).find((entry) => entry.id === slug || entry.slug === slug);
 
 if (!post) {
   Astro.response.status = 404;
@@ -25,7 +26,9 @@ const Content = rendered?.Content;
       pubDate={new Date()}
     >
       <p>This trail entry does not exist.</p>
-      <p><a href="/blog">Return to trail log index</a></p>
+      <p>
+        <a href="/blog">Return to trail log index</a>
+      </p>
     </BlogPost>
   )
 }

@@ -8,93 +8,86 @@ const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
-const checkpoints = [
-  "Santa Monica",
-  "Los Angeles",
-  "San Bernardino",
-  "Kingman",
-  "Seligman",
-  "Flagstaff",
-  "Gallup",
-  "Albuquerque",
+const routeStops = [
+  { city: "Santa Monica", state: "CA" },
+  { city: "Barstow", state: "CA" },
+  { city: "Needles", state: "CA" },
+  { city: "Kingman", state: "AZ" },
+  { city: "Seligman", state: "AZ" },
+  { city: "Flagstaff", state: "AZ" },
+  { city: "Winslow", state: "AZ" },
+  { city: "Holbrook", state: "AZ" },
+  { city: "Gallup", state: "NM" },
+  { city: "Albuquerque", state: "NM" },
 ];
 
-const totalLegs = checkpoints.length - 1;
-const completedLegs = Math.min(posts.length, totalLegs);
-const progressPercent = Math.round((completedLegs / totalLegs) * 100);
-const currentStop =
-  checkpoints[Math.min(completedLegs, checkpoints.length - 1)];
-const nextStop =
-  checkpoints[Math.min(completedLegs + 1, checkpoints.length - 1)];
-const hasArrived = completedLegs >= totalLegs;
-const currentPosition = hasArrived
-  ? `At ${checkpoints[checkpoints.length - 1]}`
-  : `Between ${currentStop} and ${nextStop}`;
+const latestPost = posts[0];
+const currentStop = latestPost?.data.city && latestPost?.data.state
+  ? { city: latestPost.data.city, state: latestPost.data.state }
+  : null;
+const currentIndex = currentStop
+  ? routeStops.findIndex(
+      (stop) => stop.city === currentStop.city && stop.state === currentStop.state,
+    )
+  : -1;
 
-const meterWidth = 32;
-const filledCells = Math.round((progressPercent / 100) * meterWidth);
-const asciiMeter = `[${"#".repeat(filledCells)}${".".repeat(meterWidth - filledCells)}]`;
-const stopSegments = checkpoints.map((stop, index) => `${index + 1}.${stop}`);
-const routeLegendRows = [];
-for (let i = 0; i < stopSegments.length; i += 3) {
-  routeLegendRows.push(stopSegments.slice(i, i + 3).join(" -> "));
-}
-const routeLegend = routeLegendRows.join("\n       ");
+const completedCount = currentIndex >= 0 ? currentIndex + 1 : 0;
+const progressPercent = routeStops.length > 0
+  ? Math.round((completedCount / routeStops.length) * 100)
+  : 0;
+const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
+  ? routeStops[currentIndex + 1]
+  : null;
 ---
 
 <SiteShell
-  title={`${SITE_TITLE} | Trail Log`}
+  title={`${SITE_TITLE} | Trail Journal`}
   description={SITE_DESCRIPTION}
-  screenLabel="ROUTE 66 EXPEDITION // DAYBOOK INDEX"
+  screenLabel="Route 66 Journal"
 >
-  <section class="terminal-panel intro-panel">
-    <p class="terminal-label">COMMAND</p>
-    <h1>TRAIL JOURNAL</h1>
-    <p class="intro-copy">Select an entry to continue along the road.</p>
-  </section>
-
-  <section class="terminal-panel ascii-panel" aria-label="Trail status chart">
-    <p class="terminal-label">TRAIL STATUS</p>
-    <div class="trail-dashboard">
-      <dl class="status-grid">
-        <div>
-          <dt>Trail Start</dt>
-          <dd>Santa Monica</dd>
-        </div>
-        <div>
-          <dt>Destination</dt>
-          <dd>Albuquerque</dd>
-        </div>
-        <div>
-          <dt>Current Position</dt>
-          <dd>{currentPosition}</dd>
-        </div>
-        <div>
-          <dt>Next Stop</dt>
-          <dd>{hasArrived ? "Camp Established" : nextStop}</dd>
-        </div>
-      </dl>
-
-      <div class="progress-block" aria-label="Trip progress">
-        <p class="progress-meta">Progress {progressPercent}%</p>
-        <pre class="progress-meter">{asciiMeter} {progressPercent}%</pre>
-      </div>
-
-      <pre class="ascii-chart">LEGS: {completedLegs}/{totalLegs}
-ROUTE:
-{routeLegend}</pre>
+  <section class="route-progress journal-card" aria-label="Route 66 progress">
+    <p class="eyebrow">Route Scope</p>
+    <h2 class="route-progress__heading">
+      Santa Monica, CA → Albuquerque, NM
+    </h2>
+    <div class="route-progress__stats">
+      <p><strong>Current:</strong> {currentStop ? `${currentStop.city}, ${currentStop.state}` : "Not logged yet"}</p>
+      <p><strong>Next:</strong> {nextStop ? `${nextStop.city}, ${nextStop.state}` : "Route complete"}</p>
+      <p><strong>Complete:</strong> {progressPercent}%</p>
     </div>
+    <ol class="route-timeline" aria-label="Route 66 stop order">
+      {
+        routeStops.map((stop, index) => {
+          const status = currentIndex < 0
+            ? "upcoming"
+            : index < currentIndex
+              ? "completed"
+              : index === currentIndex
+                ? "current"
+                : "upcoming";
+          return (
+            <li class={`route-timeline__item route-timeline__item--${status}`}>
+              <span class="route-timeline__dot" aria-hidden="true" />
+              <p class="route-timeline__label">
+                {stop.city}, {stop.state}
+              </p>
+              <span class="route-timeline__status">{status}</span>
+            </li>
+          );
+        })
+      }
+    </ol>
   </section>
 
-  <ul class="post-list">
+  <ul class="post-list" aria-label="Journal entries">
     {
       posts.map((post) => (
         <li>
           <a class="post-card" href={`/blog/${post.id}/`}>
-            <p class="terminal-label">LOG ENTRY</p>
             <p class="post-card__title">{post.data.title}</p>
-            <p class="post-card__date">
+            <p class="post-card__meta">
               <FormattedDate date={post.data.pubDate} />
+              {post.data.city && post.data.state ? ` · ${post.data.city}, ${post.data.state}` : ""}
             </p>
             <p class="post-card__desc">{post.data.description}</p>
           </a>
@@ -105,81 +98,98 @@ ROUTE:
 </SiteShell>
 
 <style>
-  .intro-panel {
-    margin-bottom: 0.9rem;
+  .route-progress {
+    margin: 0 0 var(--space-4);
   }
 
-  .intro-copy {
-    margin: 0;
-    color: var(--crt-dim);
+  .route-progress__heading {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-xl);
   }
 
-  .ascii-panel {
-    margin-bottom: 1rem;
-  }
-
-  .trail-dashboard {
+  .route-progress__stats {
     display: grid;
-    gap: 0.7rem;
+    gap: var(--space-1);
+    margin: 0 0 var(--space-4);
   }
 
-  .status-grid {
+  .route-progress__stats p {
     margin: 0;
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  .route-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.45rem 0.7rem;
-    border: 1px solid var(--frame-edge);
-    background: var(--panel-bg);
-    padding: 0.65rem;
+    gap: var(--space-2);
   }
 
-  .status-grid div {
-    min-width: 0;
+  .route-timeline__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.25rem 1fr auto;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 1.8rem;
+    padding-left: var(--space-1);
   }
 
-  .status-grid dt {
+  .route-timeline__item::before {
+    content: "";
+    position: absolute;
+    left: 0.56rem;
+    top: 1rem;
+    bottom: -0.9rem;
+    width: 2px;
+    background: color-mix(in srgb, var(--border) 70%, #2f2018 30%);
+  }
+
+  .route-timeline__item:last-child::before {
+    content: none;
+  }
+
+  .route-timeline__dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--border) 74%, #2f2018 26%);
+    background: rgba(255, 249, 233, 0.95);
+    z-index: 1;
+  }
+
+  .route-timeline__label {
     margin: 0;
-    color: var(--crt-dim);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
+    font-size: var(--text-sm);
+    line-height: 1.25;
+  }
+
+  .route-timeline__status {
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
     text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    color: var(--pine-soft);
   }
 
-  .status-grid dd {
-    margin: 0.25rem 0 0;
-    font-size: 0.83rem;
-    line-height: 1.5;
+  .route-timeline__item--completed .route-timeline__dot {
+    background: var(--pine);
+    border-color: color-mix(in srgb, var(--pine) 72%, #1f3329 28%);
   }
 
-  .progress-block {
-    border: 1px solid var(--frame-edge);
-    background: var(--panel-bg);
-    padding: 0.65rem;
+  .route-timeline__item--current .route-timeline__dot {
+    background: #d0893f;
+    border-color: #9f6128;
   }
 
-  .progress-meta {
-    margin: 0 0 0.45rem;
-    color: var(--crt-dim);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+  .route-timeline__item--current .route-timeline__label {
+    font-weight: 700;
   }
 
-  .progress-meter {
-    margin: 0;
-    white-space: pre;
-    overflow-x: auto;
-    color: var(--crt);
-  }
-
-  .ascii-chart {
-    margin: 0;
-    white-space: pre;
-    overflow-x: auto;
-    background: var(--panel-bg);
-    border: 1px solid var(--frame-edge);
-    color: var(--crt);
-    padding: 0.7rem;
+  .route-timeline__item--upcoming .route-timeline__label {
+    color: color-mix(in srgb, var(--ink) 84%, #7c6859 16%);
   }
 
   .post-list {
@@ -187,86 +197,44 @@ ROUTE:
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.6rem;
+    gap: var(--space-3);
   }
 
   .post-card {
     display: block;
-    border: 1px solid var(--frame-edge);
-    background: var(--panel-bg);
     text-decoration: none;
     color: inherit;
-    padding: 0.7rem;
-    opacity: 0;
-    transform: translateY(8px);
-    animation: card-enter 260ms ease-out forwards;
-  }
-
-  .post-list li:nth-child(1) .post-card {
-    animation-delay: 70ms;
-  }
-
-  .post-list li:nth-child(2) .post-card {
-    animation-delay: 140ms;
-  }
-
-  .post-list li:nth-child(3) .post-card {
-    animation-delay: 210ms;
-  }
-
-  .post-list li:nth-child(n + 4) .post-card {
-    animation-delay: 280ms;
+    border: 1px solid color-mix(in srgb, var(--border) 82%, #2f2018 18%);
+    border-radius: var(--radius-1);
+    background: linear-gradient(to bottom, rgba(255, 250, 235, 0.95), rgba(246, 235, 208, 0.95));
+    padding: var(--space-4);
   }
 
   .post-card:hover {
-    border-color: var(--crt-dim);
-    box-shadow: inset 0 0 0 1px rgba(174, 255, 128, 0.2);
+    border-color: color-mix(in srgb, var(--pine-soft) 64%, #1f3329 36%);
   }
 
   .post-card__title {
-    margin: 0 0 0.35rem;
-    font-size: 1rem;
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: 1.15;
+    color: #2f2018;
   }
 
-  .post-card__date {
-    margin: 0 0 0.35rem;
-    color: var(--crt-dim);
-    font-size: 0.86rem;
+  .post-card__meta {
+    margin: 0 0 var(--space-2);
+    color: var(--pine-soft);
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    letter-spacing: var(--meta-letter-spacing);
+    text-transform: uppercase;
+    line-height: 1.35;
   }
 
   .post-card__desc {
     margin: 0;
-    color: var(--crt-dim);
-  }
-
-  @keyframes card-enter {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @media (max-width: 620px) {
-    .status-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .progress-meter {
-      white-space: pre-wrap;
-      overflow-x: visible;
-    }
-
-    .ascii-chart {
-      white-space: pre-wrap;
-      overflow-x: visible;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .post-card {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
+    font-size: var(--text-sm);
+    line-height: 1.55;
   }
 </style>
