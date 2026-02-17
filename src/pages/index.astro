@@ -1,3 +1,106 @@
 ---
-return Astro.redirect("/blog");
+import oregonTrailBg from "../assets/oregon-trail-bg.png";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import BaseHead from "../components/BaseHead.astro";
 ---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body>
+    <main class="home-hero" style={`--hero-image: url("${oregonTrailBg.src}");`}>
+      <section class="home-card">
+        <p class="home-eyebrow">Route 66 Diary</p>
+        <h1>Follow the Road East</h1>
+        <p>
+          Daily notes, miles logged, and roadside moments from Santa Monica to
+          Albuquerque, New Mexico.
+        </p>
+        <a class="home-cta" href="/blog/">Enter Journal</a>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  .home-hero {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 3vw, 2rem);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(26, 22, 15, 0.5) 0%,
+        rgba(33, 24, 14, 0.35) 38%,
+        rgba(30, 21, 14, 0.55) 100%
+      ),
+      linear-gradient(
+        135deg,
+        rgba(206, 169, 106, 0.2) 0%,
+        rgba(71, 97, 132, 0.22) 100%
+      ),
+      var(--hero-image) center / cover no-repeat;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .home-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 70% 15%, rgba(255, 230, 185, 0.22), transparent 55%);
+    backdrop-filter: blur(2px) saturate(0.8) contrast(0.9);
+    z-index: -1;
+  }
+
+  .home-card {
+    width: min(40rem, 100%);
+    text-align: center;
+    border: 2px solid color-mix(in srgb, var(--border) 80%, #2f2018 20%);
+    border-radius: var(--radius-2);
+    background: linear-gradient(
+      to bottom,
+      rgba(248, 238, 215, 0.94),
+      rgba(236, 222, 190, 0.95)
+    );
+    box-shadow: 0 12px 26px rgba(18, 12, 8, 0.32);
+    padding: clamp(1.2rem, 3.4vw, 2rem);
+  }
+
+  .home-eyebrow {
+    margin: 0 0 var(--space-2);
+    color: var(--pine-soft);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    font-size: var(--text-xs);
+  }
+
+  .home-card h1 {
+    margin: 0 0 var(--space-3);
+  }
+
+  .home-card p {
+    margin: 0 0 var(--space-4);
+    line-height: 1.5;
+  }
+
+  .home-cta {
+    display: inline-block;
+    text-decoration: none;
+    color: #fef6e4;
+    background: linear-gradient(to bottom, #456857, #2f4a3d);
+    border: 1px solid #274035;
+    border-radius: var(--radius-1);
+    padding: 0.62rem 0.9rem;
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+  }
+
+  .home-cta:hover {
+    background: linear-gradient(to bottom, #507564, #355344);
+  }
+</style>

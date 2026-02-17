@@ -145,11 +145,35 @@ pre {
 
 .trail-page {
   position: relative;
+  min-height: 100vh;
+  padding: var(--space-4) 0;
+  isolation: isolate;
+}
+
+.trail-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(26, 22, 15, 0.46) 0%,
+      rgba(33, 24, 14, 0.32) 38%,
+      rgba(30, 21, 14, 0.5) 100%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(206, 169, 106, 0.18) 0%,
+      rgba(71, 97, 132, 0.2) 100%
+    ),
+    var(--trail-bg) center / cover no-repeat;
+  filter: saturate(0.82) contrast(0.9);
 }
 
 .site-shell {
   width: min(56rem, calc(100% - 1rem));
-  margin: var(--space-4) auto;
+  margin: 0 auto;
   padding: var(--space-4);
   border: 2px solid color-mix(in srgb, var(--border) 80%, #2f2018 20%);
   border-radius: var(--radius-2);
