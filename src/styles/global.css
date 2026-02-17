@@ -60,6 +60,8 @@ html,
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -149,6 +151,7 @@ pre {
   min-height: 100vh;
   padding: var(--space-4) 0;
   isolation: isolate;
+  overflow-x: hidden;
 }
 
 .trail-page::before {
