@@ -23,7 +23,6 @@ const blog = defineCollection({
       .optional(),
     mapPointHints: z.array(z.string()).optional(),
     weather: z.string().optional(),
-    tags: z.array(z.string()).optional(),
   }),
 });
 
