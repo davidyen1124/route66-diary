@@ -43,15 +43,10 @@ Supported frontmatter fields (most important):
 - `title` (required)
 - `description` (required)
 - `pubDate` (required; date)
-- `updatedDate` (optional date)
 - `city`, `state` (optional)
-- `latitude`, `longitude` (optional)
 - `weather` (optional)
-- `locationSource` (`explicit` | `inferred`, optional)
-- `tags` (optional string list)
 - `mapPointHints` (optional hints used for geocoding)
 - `mapPoints` (optional array of `{ label, latitude, longitude }`)
-- `heroImage` (optional)
 
 ## Routes
 
@@ -71,9 +66,14 @@ description: "..."
 pubDate: 2026-02-17
 city: "..."
 state: "..."
-latitude: 35.0
-longitude: -115.0
-locationSource: "explicit"
+---
+
+Trip notes...
+```
+
+Optional map/weather fields:
+
+```md
 weather: "Mostly clear"
 mapPointHints:
   - "Stop name, state"
@@ -81,11 +81,6 @@ mapPoints:
   - label: "Stop name, state"
     latitude: 35.0
     longitude: -115.0
-tags:
-  - route-66
----
-
-Trip notes...
 ```
 
 If only `mapPointHints` are present, run the enrichment script below to generate `mapPoints`.
@@ -108,4 +103,4 @@ For backward compatibility, `GEOCODE_MAPS_API_KEY` is also accepted.
 
 ## Note on map rendering
 
-`src/layouts/BlogPost.astro` renders a Leaflet map when coordinates are available (from `mapPoints` or fallback `latitude`/`longitude`). If no points are available it shows a compact fallback message.
+`src/layouts/BlogPost.astro` renders a Leaflet map when coordinates are available from `mapPoints`. If no points are available it shows a compact fallback message.
