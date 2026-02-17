@@ -56,15 +56,9 @@
   box-sizing: border-box;
 }
 
-html,
 body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  overflow-x: hidden;
-}
-
-body {
   min-height: 100vh;
   color: var(--ink);
   font-family: var(--font-body);
@@ -151,7 +145,6 @@ pre {
   min-height: 100vh;
   padding: var(--space-4) 0;
   isolation: isolate;
-  overflow-x: hidden;
 }
 
 .trail-page::before {
@@ -173,7 +166,6 @@ pre {
     ),
     var(--trail-bg) center / cover no-repeat;
   filter: blur(2px) saturate(0.82) contrast(0.9);
-  transform: scale(1.02);
 }
 
 .site-shell {
