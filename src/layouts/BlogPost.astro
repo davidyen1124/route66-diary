@@ -129,6 +129,17 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
               });
               primaryTile.addTo(map);
 
+              const pathLatLngs = points.map((point) => [point.lat, point.lng]);
+              if (pathLatLngs.length > 1) {
+                L.polyline(pathLatLngs, {
+                  color: "#2f4a3d",
+                  weight: 3,
+                  opacity: 0.85,
+                  lineJoin: "round",
+                  lineCap: "round",
+                }).addTo(map);
+              }
+
               const bounds = [];
               for (const point of points) {
                 L.circleMarker([point.lat, point.lng], {
