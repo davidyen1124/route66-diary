@@ -34,7 +34,9 @@
   --radius-1: 0.6rem;
   --radius-2: 0.9rem;
 
-  --font-body: var(--font-oregon);
+  /* Keep the retro pixel vibe for headings/labels, but make long-form text readable. */
+  --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   --font-display: var(--font-oregon);
   --font-accent: var(--font-oregon);
 
@@ -64,6 +66,9 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   background: linear-gradient(
     180deg,
     var(--sky-top) 0%,
@@ -128,8 +133,9 @@ ol {
 
 code,
 pre {
-  font-family: var(--font-accent);
-  font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9em;
 }
 
 pre {

@@ -1,10 +1,22 @@
 ---
 import { getCollection, render } from "astro:content";
 import BlogPost from "../../layouts/BlogPost.astro";
+import { buildBlogSlugIndex } from "../../lib/blogSlugs";
 
 const rawSlug = Astro.params.slug;
 const slug = Array.isArray(rawSlug) ? rawSlug.join("/") : rawSlug;
-const post = (await getCollection("blog")).find((entry) => entry.id === slug || entry.slug === slug);
+
+const allPosts = await getCollection("blog");
+const slugIndex = buildBlogSlugIndex(allPosts);
+
+const requested = slug ?? "";
+const resolved = slugIndex.bySlug.get(requested);
+
+if (resolved && requested !== resolved.canonical) {
+  return Astro.redirect(`/blog/${resolved.canonical}/`, 301);
+}
+
+const post = resolved?.entry ?? null;
 
 if (!post) {
   Astro.response.status = 404;

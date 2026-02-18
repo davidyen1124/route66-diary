@@ -5,7 +5,7 @@
   "scripts": {
     "clean:astro": "rm -rf .astro",
     "dev": "npm run clean:astro && astro dev",
-    "build": "npm run clean:astro && astro build",
+    "build": "node scripts/validate-slugs.mjs && npm run clean:astro && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "enrich:map-points": "node scripts/enrich-map-points.mjs",

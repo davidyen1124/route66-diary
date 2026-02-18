@@ -7,6 +7,7 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     city: z.string().optional(),
     state: z.string().optional(),
+    location: z.string().optional(),
     mapPoints: z
       .array(
         z.object({

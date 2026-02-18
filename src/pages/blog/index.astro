@@ -3,10 +3,12 @@ import { getCollection } from "astro:content";
 import FormattedDate from "../../components/FormattedDate.astro";
 import SiteShell from "../../layouts/SiteShell.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+import { buildBlogSlugIndex, blogEntryUrl } from "../../lib/blogSlugs";
 
 const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const slugIndex = buildBlogSlugIndex(posts);
 
 const routeStops = [
   { city: "Santa Monica", state: "CA" },
@@ -81,7 +83,7 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
     {
       posts.map((post) => (
         <li>
-          <a class="post-card" href={`/blog/${post.id}/`}>
+          <a class="post-card" href={blogEntryUrl(post, slugIndex)}>
             <p class="post-card__title">{post.data.title}</p>
             <p class="post-card__meta">
               <FormattedDate date={post.data.pubDate} />
