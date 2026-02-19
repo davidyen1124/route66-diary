@@ -1,0 +1,139 @@
+---
+// Lightweight decorative snow overlay.
+// Render conditionally from the post layout based on existing post tags.
+
+const flakeCount = 130;
+const flakes = Array.from({ length: flakeCount }, () => {
+  // Bigger + higher contrast so it actually reads against the parchment.
+  const size = (Math.random() * 6.0 + 2.4).toFixed(2);
+  const opacity = (Math.random() * 0.28 + 0.68).toFixed(2);
+  const xStart = `${(Math.random() * 100).toFixed(3)}%`;
+  const xDrift = `${(Math.random() * 28 - 14).toFixed(2)}px`;
+  const swayDistance = `${(Math.random() * 14 + 4).toFixed(2)}px`;
+  const swayDuration = `${(Math.random() * 2.3 + 1.7).toFixed(2)}s`;
+  const swayDelay = `${(Math.random() * -3.2).toFixed(2)}s`;
+  const fallDuration = `${(Math.random() * 7 + 8).toFixed(2)}s`;
+  const fallDelay = `${(Math.random() * -16).toFixed(2)}s`;
+  // Use viewport distance so flakes actually travel visibly; container clips overflow.
+  const fallDistance = `${Math.round(Math.random() * 60 + 120)}vh`;
+  const yStatic = `${(Math.random() * 100).toFixed(2)}%`;
+
+  return {
+    size,
+    opacity,
+    xStart,
+    xDrift,
+    swayDistance,
+    swayDuration,
+    swayDelay,
+    fallDuration,
+    fallDelay,
+    fallDistance,
+    yStatic,
+  };
+});
+---
+
+<div class="snow" aria-hidden="true">
+  <div class="snow__field">
+    {flakes.map((f) => (
+      <span
+        class="snow__flake"
+        style={[
+          `--flake-size:${f.size}px`,
+          `--flake-opacity:${f.opacity}`,
+          `--x-start:${f.xStart}`,
+          `--x-drift:${f.xDrift}`,
+          `--fall-duration:${f.fallDuration}`,
+          `--fall-delay:${f.fallDelay}`,
+          `--fall-distance:${f.fallDistance}`,
+          `--sway-distance:${f.swayDistance}`,
+          `--sway-duration:${f.swayDuration}`,
+          `--sway-delay:${f.swayDelay}`,
+          `--y-static:${f.yStatic}`,
+        ].join(';')}
+      >
+        <span class="snow__flake-dot"></span>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .snow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+    border-radius: inherit;
+    /* Help white flakes pop on the parchment/card. */
+    mix-blend-mode: screen;
+  }
+
+  .snow__field {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .snow__flake {
+    position: absolute;
+    left: var(--x-start);
+    top: -48px;
+    width: var(--flake-size);
+    height: var(--flake-size);
+    opacity: var(--flake-opacity);
+    animation: snow-fall var(--fall-duration) linear infinite;
+    animation-delay: var(--fall-delay);
+    will-change: transform;
+    filter:
+      drop-shadow(0 1px 0 rgba(34, 58, 45, 0.22))
+      drop-shadow(0 0 10px rgba(255, 255, 255, 0.14));
+  }
+
+  .snow__flake-dot {
+    display: block; /* inline elements ignore width/height, causing invisible flakes */
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow:
+      0 0 10px rgba(255, 255, 255, 0.32),
+      0 0 2px rgba(255, 255, 255, 0.55);
+    animation: snow-sway var(--sway-duration) ease-in-out infinite alternate;
+    animation-delay: var(--sway-delay);
+    will-change: transform;
+  }
+
+  @keyframes snow-fall {
+    from {
+      transform: translate3d(0, -40px, 0);
+    }
+    to {
+      transform: translate3d(var(--x-drift), var(--fall-distance), 0);
+    }
+  }
+
+  @keyframes snow-sway {
+    from {
+      transform: translate3d(calc(var(--sway-distance) * -1), 0, 0);
+    }
+    to {
+      transform: translate3d(var(--sway-distance), 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .snow__flake {
+      animation: none;
+      top: var(--y-static);
+      transform: translate3d(0, 0, 0);
+    }
+
+    .snow__flake-dot {
+      animation: none;
+    }
+  }
+</style>

@@ -1,11 +1,23 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "../components/FormattedDate.astro";
+import SnowOverlay from "../components/SnowOverlay.astro";
 import SiteShell from "./SiteShell.astro";
 
 type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, pubDate, city, state, weather, mapPoints: frontmatterMapPoints = [] } = Astro.props as Props;
+const {
+  title,
+  description,
+  pubDate,
+  city,
+  state,
+  weather,
+  tags = [],
+  mapPoints: frontmatterMapPoints = [],
+} = Astro.props as Props;
+
+const showSnow = Array.isArray(tags) && tags.includes("snow");
 const locationLabel = city && state ? `${city}, ${state}` : "Unknown stop";
 
 type MapPoint = { key: string; label: string; lat: number; lng: number };
@@ -44,6 +56,8 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
 
 <SiteShell title={title} description={description}>
   <article class="journal-card entry">
+    {showSnow && <SnowOverlay />}
+
     <p class="back top-back">
       <a href="/blog">← Back to journal index</a>
     </p>
@@ -283,6 +297,7 @@ const mapData = hasMapLocation ? JSON.stringify(mapPoints) : "";
 <style>
   .entry {
     width: 100%;
+    position: relative;
   }
 
   .top-back {
