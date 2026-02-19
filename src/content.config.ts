@@ -8,9 +8,6 @@ const blog = defineCollection({
     city: z.string().optional(),
     state: z.string().optional(),
     location: z.string().optional(),
-    // Canonical URL slug is required in frontmatter (validated elsewhere), but optional in schema
-    // so content parsing doesn't explode if a draft is missing it.
-    slugAliases: z.array(z.string()).optional(),
     mapPoints: z
       .array(
         z.object({

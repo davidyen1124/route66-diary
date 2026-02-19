@@ -31,7 +31,7 @@ async function main() {
 
   const missing = [];
   const invalid = [];
-  const duplicates = new Map(); // slug/alias -> [files]
+  const duplicates = new Map(); // slug -> [files]
 
   for (const name of files) {
     const filePath = path.join(BLOG_DIR, name);
@@ -41,38 +41,23 @@ async function main() {
       missing.push({ file: name, reason: "no frontmatter block found" });
       continue;
     }
+
     const fm = parseYamlFrontmatter(parts.frontmatter, filePath);
     const slug = typeof fm.slug === "string" ? fm.slug.trim() : "";
+
     if (!slug) {
       missing.push({ file: name, reason: "frontmatter slug missing/blank" });
       continue;
     }
+
     if (!SLUG_RE.test(slug)) {
       invalid.push({ file: name, slug, reason: "must be URL-safe kebab-case" });
       continue;
     }
 
-    const aliasesRaw = fm.slugAliases;
-    const aliases = Array.isArray(aliasesRaw)
-      ? aliasesRaw.map((x) => String(x ?? "").trim()).filter(Boolean)
-      : [];
-
-    for (const a of aliases) {
-      if (!SLUG_RE.test(a)) {
-        invalid.push({ file: name, slug: a, reason: "slugAliases must be URL-safe kebab-case" });
-      }
-    }
-
-    const register = (value) => {
-      const v = String(value ?? "").trim();
-      if (!v) return;
-      const list = duplicates.get(v) ?? [];
-      list.push(name);
-      duplicates.set(v, list);
-    };
-
-    register(slug);
-    for (const a of aliases) register(a);
+    const list = duplicates.get(slug) ?? [];
+    list.push(name);
+    duplicates.set(slug, list);
   }
 
   const dupLines = [...duplicates.entries()]
@@ -83,16 +68,12 @@ async function main() {
   const problems = [];
   if (missing.length) {
     problems.push(
-      `Missing required frontmatter slug:\n${missing
-        .map((x) => `- ${x.file} (${x.reason})`)
-        .join("\n")}`,
+      `Missing required frontmatter slug:\n${missing.map((x) => `- ${x.file} (${x.reason})`).join("\n")}`,
     );
   }
   if (invalid.length) {
     problems.push(
-      `Invalid frontmatter slug:\n${invalid
-        .map((x) => `- ${x.file}: "${x.slug}" (${x.reason})`)
-        .join("\n")}`,
+      `Invalid frontmatter slug:\n${invalid.map((x) => `- ${x.file}: \"${x.slug}\" (${x.reason})`).join("\n")}`,
     );
   }
   if (dupLines.length) {
@@ -111,4 +92,3 @@ main().catch((error) => {
   console.error(`[validate-slugs] Failed:`, error);
   process.exit(1);
 });
-

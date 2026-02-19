@@ -19,17 +19,16 @@ function isExplicitFrontmatterSlug(entry: BlogEntry): boolean {
 }
 
 /**
- * Build a deterministic index of blog entries keyed by:
- * - canonical slug (from required frontmatter `slug`)
- * - legacy id (filename-derived) for back-compat redirects
+ * Build a deterministic index of blog entries keyed by canonical slug.
+ *
+ * We intentionally do NOT keep legacy slug/id aliases. If a slug changes,
+ * old links should 404 (per user preference).
  */
 export function buildBlogSlugIndex(entries: BlogEntry[]): {
   byId: Map<string, SlugPayload>;
   bySlug: Map<string, SlugPayload>;
 } {
   const ordered = [...entries].sort((a, b) => a.id.localeCompare(b.id));
-
-  const allIds = new Set(ordered.map((e) => e.id));
 
   const missing: string[] = [];
   const invalid: Array<{ id: string; provided: string; normalized: string; reason: string }> = [];
@@ -57,17 +56,6 @@ export function buildBlogSlugIndex(entries: BlogEntry[]): {
       continue;
     }
 
-    // Prevent conflicts with legacy id-based URLs: /blog/<entry.id>/
-    if (allIds.has(provided)) {
-      invalid.push({
-        id: entry.id,
-        provided,
-        normalized,
-        reason: "slug conflicts with an existing entry id (legacy URL)",
-      });
-      continue;
-    }
-
     const prior = seen.get(provided);
     if (prior) {
       const ids = duplicates.get(provided) ?? [prior];
@@ -81,27 +69,6 @@ export function buildBlogSlugIndex(entries: BlogEntry[]): {
     const payload: SlugPayload = { canonical: provided, entry };
     byId.set(entry.id, payload);
     bySlug.set(provided, payload);
-
-    // Back-compat aliases for old id-based URLs.
-    // Depending on Astro/content version, entry.id may include path segments and/or file extensions.
-    // We register a few deterministic aliases so legacy links keep working.
-    const addAlias = (key?: string) => {
-      const k = (key ?? "").trim();
-      if (!k) return;
-      if (!bySlug.has(k)) bySlug.set(k, payload);
-    };
-
-    addAlias(entry.id);
-    addAlias(entry.id.replace(/\.(md|mdx)$/i, ""));
-    const base = entry.id.split("/").pop() ?? "";
-    addAlias(base);
-    addAlias(base.replace(/\.(md|mdx)$/i, ""));
-
-    // Optional additional aliases for redirects when renaming slugs.
-    const aliases = (entry.data as any)?.slugAliases;
-    if (Array.isArray(aliases)) {
-      for (const a of aliases) addAlias(String(a));
-    }
   }
 
   const problems: string[] = [];
