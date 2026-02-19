@@ -20,7 +20,7 @@ All `src/content/blog/*.md` entries must include:
 - `description`
 - `pubDate`
 - `weather`
-- `mapPointHints` (or `mapPoints` with valid coordinates)
+- `mapPoints` (with valid coordinates after enrichment)
 
 ## Geocoding and Map Rules
 
@@ -44,8 +44,8 @@ All `src/content/blog/*.md` entries must include:
 
 1. Add or update blog content in `src/content/blog/*.md`.
 2. Make sure writing is funny and includes date + weather.
-3. Add `mapPointHints` for each location mentioned.
-4. Run geocode enrichment to generate `mapPoints`.
+3. Add `mapPoints` with location labels for each location mentioned.
+4. Run geocode enrichment to generate/fill `mapPoints` coordinates.
 5. Run `npm run build`.
 6. Run `npm run preview` and verify map markers are visible.
 7. Deploy with `npm run deploy` when ready.

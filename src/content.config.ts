@@ -12,12 +12,11 @@ const blog = defineCollection({
       .array(
         z.object({
           label: z.string(),
-          latitude: z.number(),
-          longitude: z.number(),
+          latitude: z.number().optional(),
+          longitude: z.number().optional(),
         }),
       )
       .optional(),
-    mapPointHints: z.array(z.string()).optional(),
     weather: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),

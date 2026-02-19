@@ -45,8 +45,7 @@ Supported frontmatter fields (most important):
 - `pubDate` (required; date)
 - `city`, `state` (optional)
 - `weather` (optional)
-- `mapPointHints` (optional hints used for geocoding)
-- `mapPoints` (optional array of `{ label, latitude, longitude }`)
+- `mapPoints` (optional array of `{ label, latitude?, longitude? }`; enrichment fills missing coordinates)
 
 ## Routes
 
@@ -75,16 +74,13 @@ Optional map/weather fields:
 
 ```md
 weather: "Mostly clear"
-mapPointHints:
-
-- "Stop name, state"
-  mapPoints:
-- label: "Stop name, state"
-  latitude: 35.0
-  longitude: -115.0
+mapPoints:
+  - label: "Stop name, state"
+    latitude: 35.0
+    longitude: -115.0
 ```
 
-If only `mapPointHints` are present, run the enrichment script below to generate `mapPoints`.
+If `mapPoints` labels are present without coordinates, run the enrichment script below to fill `latitude` and `longitude`.
 
 ## Geocode enrichment helper
 
@@ -95,7 +91,7 @@ GEOAPIFY_API_KEY=your_key npm run enrich:map-points
 The script:
 
 - reads every `src/content/blog/*.md`
-- uses each entry’s `mapPointHints` (or bold phrases in markdown body as fallback) to query Geoapify autocomplete (`filter=countrycode:us`, `limit=5`, `lang=en`)
+- uses each entry’s `mapPoints[].label` to query Geoapify autocomplete (`filter=countrycode:us`, `limit=5`, `lang=en`) when coordinates are missing
 - caches geocode lookups at `scripts/.geocode-cache.json`
 - updates frontmatter `mapPoints` with de-duplicated coordinates
 - leaves existing valid coordinates intact

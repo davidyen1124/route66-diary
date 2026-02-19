@@ -100,37 +100,6 @@ function parseYamlFrontmatter(frontmatter, filePath) {
   }
 }
 
-function extractBoldPhrases(markdownBody) {
-  const phrases = [];
-  const seen = new Set();
-  const re = /\*\*([^*\n][^*]*?)\*\*/g;
-  let match;
-  while ((match = re.exec(markdownBody)) !== null) {
-    const candidate = match[1].replace(/\s+/g, " ").trim();
-    if (!candidate || candidate.length > 80) continue;
-    const key = candidate.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    phrases.push(candidate);
-  }
-  return phrases;
-}
-
-function uniqueByCaseFold(values) {
-  const out = [];
-  const seen = new Set();
-  for (const value of values) {
-    if (typeof value !== "string") continue;
-    const trimmed = value.trim();
-    if (!trimmed) continue;
-    const key = trimmed.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(trimmed);
-  }
-  return out;
-}
-
 function formatNumber(value) {
   return Number(value.toFixed(6)).toString();
 }
@@ -206,6 +175,48 @@ function normalizeForMatch(value) {
 function toFiniteNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function toMapPointInput(value) {
+  if (typeof value === "string") {
+    const label = value.trim();
+    if (!label) return null;
+    return { label, latitude: null, longitude: null };
+  }
+
+  if (!value || typeof value !== "object") return null;
+  if (typeof value.label !== "string") return null;
+  const label = value.label.trim();
+  if (!label) return null;
+
+  const latitude = toFiniteNumber(value.latitude);
+  const longitude = toFiniteNumber(value.longitude);
+  return { label, latitude, longitude };
+}
+
+function collectMapPointInputs(rawMapPoints) {
+  const byLabel = new Map();
+  for (const value of rawMapPoints) {
+    const point = toMapPointInput(value);
+    if (!point) continue;
+
+    const key = point.label.toLowerCase();
+    const existing = byLabel.get(key);
+    if (!existing) {
+      byLabel.set(key, point);
+      continue;
+    }
+
+    const existingHasCoords =
+      Number.isFinite(existing.latitude) && Number.isFinite(existing.longitude);
+    const pointHasCoords =
+      Number.isFinite(point.latitude) && Number.isFinite(point.longitude);
+
+    if (!existingHasCoords && pointHasCoords) {
+      byLabel.set(key, point);
+    }
+  }
+  return Array.from(byLabel.values());
 }
 
 function extractGeoapifyCandidates(payload) {
@@ -357,48 +368,31 @@ async function processFile(filePath, cache) {
   }
 
   const data = parseYamlFrontmatter(split.frontmatter, filePath);
-  const existingPoints = Array.isArray(data.mapPoints) ? data.mapPoints : [];
+  const rawMapPoints = Array.isArray(data.mapPoints) ? data.mapPoints : [];
+  const pointInputs = collectMapPointInputs(rawMapPoints);
 
-  const hints =
-    Array.isArray(data.mapPointHints) && data.mapPointHints.length > 0
-      ? uniqueByCaseFold(data.mapPointHints)
-      : uniqueByCaseFold([
-          ...extractBoldPhrases(split.body),
-          data.city && data.state ? `${data.city}, ${data.state}` : "",
-        ]);
-
-  if (hints.length === 0) {
-    log(`skip ${path.basename(filePath)}: no location hints`);
+  if (pointInputs.length === 0) {
+    log(`skip ${path.basename(filePath)}: no mapPoints labels`);
     return false;
   }
 
-  const existingByLabel = new Map(
-    existingPoints
-      .filter((point) => point && typeof point.label === "string")
-      .map((point) => [point.label.toLowerCase(), point]),
-  );
-
   const resolvedPoints = [];
-  for (const hint of hints) {
-    const existing = existingByLabel.get(hint.toLowerCase());
+  for (const point of pointInputs) {
     if (
-      existing &&
-      typeof existing.latitude === "number" &&
-      Number.isFinite(existing.latitude) &&
-      typeof existing.longitude === "number" &&
-      Number.isFinite(existing.longitude)
+      Number.isFinite(point.latitude) &&
+      Number.isFinite(point.longitude)
     ) {
       resolvedPoints.push({
-        label: hint,
-        latitude: existing.latitude,
-        longitude: existing.longitude,
+        label: point.label,
+        latitude: point.latitude,
+        longitude: point.longitude,
       });
       continue;
     }
 
-    const coords = await geocodeLabel(hint, cache);
+    const coords = await geocodeLabel(point.label, cache);
     resolvedPoints.push({
-      label: hint,
+      label: point.label,
       latitude: coords.latitude,
       longitude: coords.longitude,
     });
