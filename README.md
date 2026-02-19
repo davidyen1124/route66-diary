@@ -45,7 +45,7 @@ Supported frontmatter fields (most important):
 - `pubDate` (required; date)
 - `city`, `state` (optional)
 - `weather` (optional)
-- `mapPoints` (optional array of `{ label, latitude?, longitude? }`; enrichment fills missing coordinates)
+- `mapPoints` (optional array of `{ label, latitude, longitude }`)
 
 ## Routes
 
@@ -80,23 +80,7 @@ mapPoints:
     longitude: -115.0
 ```
 
-If `mapPoints` labels are present without coordinates, run the enrichment script below to fill `latitude` and `longitude`.
-
-## Geocode enrichment helper
-
-```bash
-GEOAPIFY_API_KEY=your_key npm run enrich:map-points
-```
-
-The script:
-
-- reads every `src/content/blog/*.md`
-- uses each entry’s `mapPoints[].label` to query Geoapify autocomplete (`filter=countrycode:us`, `limit=5`, `lang=en`) when coordinates are missing
-- caches geocode lookups at `scripts/.geocode-cache.json`
-- updates frontmatter `mapPoints` with de-duplicated coordinates
-- leaves existing valid coordinates intact
-
-For backward compatibility, `GEOCODE_MAPS_API_KEY` is also accepted.
+Map points are expected to include coordinates in frontmatter (this project doesn’t ship a geocode/enrichment step in the build).
 
 ## Note on map rendering
 
