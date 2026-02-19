@@ -31,7 +31,7 @@ async function main() {
 
   const missing = [];
   const invalid = [];
-  const duplicates = new Map(); // slug -> [files]
+  const duplicates = new Map(); // slug/alias -> [files]
 
   for (const name of files) {
     const filePath = path.join(BLOG_DIR, name);
@@ -51,9 +51,28 @@ async function main() {
       invalid.push({ file: name, slug, reason: "must be URL-safe kebab-case" });
       continue;
     }
-    const list = duplicates.get(slug) ?? [];
-    list.push(name);
-    duplicates.set(slug, list);
+
+    const aliasesRaw = fm.slugAliases;
+    const aliases = Array.isArray(aliasesRaw)
+      ? aliasesRaw.map((x) => String(x ?? "").trim()).filter(Boolean)
+      : [];
+
+    for (const a of aliases) {
+      if (!SLUG_RE.test(a)) {
+        invalid.push({ file: name, slug: a, reason: "slugAliases must be URL-safe kebab-case" });
+      }
+    }
+
+    const register = (value) => {
+      const v = String(value ?? "").trim();
+      if (!v) return;
+      const list = duplicates.get(v) ?? [];
+      list.push(name);
+      duplicates.set(v, list);
+    };
+
+    register(slug);
+    for (const a of aliases) register(a);
   }
 
   const dupLines = [...duplicates.entries()]

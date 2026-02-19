@@ -96,6 +96,12 @@ export function buildBlogSlugIndex(entries: BlogEntry[]): {
     const base = entry.id.split("/").pop() ?? "";
     addAlias(base);
     addAlias(base.replace(/\.(md|mdx)$/i, ""));
+
+    // Optional additional aliases for redirects when renaming slugs.
+    const aliases = (entry.data as any)?.slugAliases;
+    if (Array.isArray(aliases)) {
+      for (const a of aliases) addAlias(String(a));
+    }
   }
 
   const problems: string[] = [];
