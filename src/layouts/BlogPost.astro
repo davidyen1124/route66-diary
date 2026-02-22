@@ -82,7 +82,7 @@ const youtubeEmbedUrl = hasYouTubeEmbed
 
     {audioSrc && (
       <div class="entry-audio-player" data-audio-player aria-label="Audio narration">
-        <audio preload="none" src={audioSrc} data-audio-el>
+        <audio preload="metadata" src={audioSrc} data-audio-el>
           <a href={audioSrc}>Listen to audio narration</a>
         </audio>
 
@@ -129,6 +129,10 @@ const youtubeEmbedUrl = hasYouTubeEmbed
 
               if (!(audio instanceof HTMLAudioElement) || !toggle || !seek || !time) continue;
 
+              if (audio.preload === "none") {
+                audio.preload = "metadata";
+              }
+
               const updateUi = () => {
                 const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
                 const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
@@ -160,6 +164,9 @@ const youtubeEmbedUrl = hasYouTubeEmbed
               audio.addEventListener("ended", updateUi);
 
               updateUi();
+              if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+                audio.load();
+              }
             }
           })();
         </script>
