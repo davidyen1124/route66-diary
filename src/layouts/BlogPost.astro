@@ -72,7 +72,7 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     {showSnow && <SnowOverlay />}
 
     <p class="entry-back-link">
-      <a href="/blog/">Back to journal index</a>
+      <a class="entry-back-button" href="/blog/">← Back to blog page</a>
     </p>
 
     <h1>{title}</h1>
@@ -347,15 +347,23 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     line-height: 1.35;
   }
 
-  .entry-back-link a {
+  .entry-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    padding: 0.34rem 0.56rem;
+    border: 1px solid color-mix(in srgb, var(--border) 78%, #2f2018 22%);
+    border-radius: 999px;
+    background: rgba(255, 250, 235, 0.82);
     color: var(--pine-soft);
     text-decoration: none;
   }
 
-  .entry-back-link a:hover,
-  .entry-back-link a:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: 0.16em;
+  .entry-back-button:hover,
+  .entry-back-button:focus-visible {
+    border-color: color-mix(in srgb, var(--pine-soft) 64%, #1f3329 36%);
+    background: rgba(255, 250, 235, 0.94);
+    text-decoration: none;
     outline: none;
   }
 
