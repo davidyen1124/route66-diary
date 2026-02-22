@@ -87,9 +87,17 @@ const youtubeEmbedUrl = hasYouTubeEmbed
         </audio>
 
         <div class="entry-audio-player__top">
-          <button class="entry-audio-player__toggle" type="button" data-audio-toggle>
-            ▶ Play
-          </button>
+          <div class="entry-audio-player__transport">
+            <button class="entry-audio-player__skip" type="button" data-audio-back>
+              ↺ 15s
+            </button>
+            <button class="entry-audio-player__toggle" type="button" data-audio-toggle>
+              ▶ Play
+            </button>
+            <button class="entry-audio-player__skip" type="button" data-audio-forward>
+              15s ↻
+            </button>
+          </div>
           <p class="entry-audio-player__label">Road-trip narration</p>
           <p class="entry-audio-player__time" data-audio-time>0:00 / --:--</p>
         </div>
@@ -136,11 +144,23 @@ const youtubeEmbedUrl = hasYouTubeEmbed
             for (const root of roots) {
               const audio = root.querySelector("[data-audio-el]");
               const toggle = root.querySelector("[data-audio-toggle]");
+              const skipBack = root.querySelector("[data-audio-back]");
+              const skipForward = root.querySelector("[data-audio-forward]");
               const seek = root.querySelector("[data-audio-seek]");
               const time = root.querySelector("[data-audio-time]");
               const rate = root.querySelector("[data-audio-rate]");
 
-              if (!(audio instanceof HTMLAudioElement) || !toggle || !seek || !time || !rate) continue;
+              if (
+                !(audio instanceof HTMLAudioElement) ||
+                !toggle ||
+                !skipBack ||
+                !skipForward ||
+                !seek ||
+                !time ||
+                !rate
+              ) {
+                continue;
+              }
 
               const updateUi = () => {
                 const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
@@ -151,12 +171,40 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                 toggle.textContent = audio.paused ? "▶ Play" : "❚❚ Pause";
               };
 
+              const STORAGE_KEY = "route66.audio.playbackRate";
+              try {
+                const savedRate = window.localStorage.getItem(STORAGE_KEY);
+                if (savedRate) {
+                  const option = [...rate.options].find((entry) => entry.value === savedRate);
+                  if (option) {
+                    rate.value = savedRate;
+                    const parsed = Number(savedRate);
+                    if (Number.isFinite(parsed) && parsed > 0) {
+                      audio.playbackRate = parsed;
+                    }
+                  }
+                }
+              } catch {
+                // ignore storage errors (private mode, blocked storage)
+              }
+
               toggle.addEventListener("click", () => {
                 if (audio.paused) {
                   void audio.play();
                 } else {
                   audio.pause();
                 }
+              });
+
+              skipBack.addEventListener("click", () => {
+                audio.currentTime = Math.max(0, audio.currentTime - 15);
+                updateUi();
+              });
+
+              skipForward.addEventListener("click", () => {
+                const duration = Number.isFinite(audio.duration) ? audio.duration : Infinity;
+                audio.currentTime = Math.min(duration, audio.currentTime + 15);
+                updateUi();
               });
 
               seek.addEventListener("input", () => {
@@ -170,6 +218,11 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                 const next = Number(rate.value);
                 if (!Number.isFinite(next) || next <= 0) return;
                 audio.playbackRate = next;
+                try {
+                  window.localStorage.setItem(STORAGE_KEY, String(next));
+                } catch {
+                  // ignore storage errors
+                }
               });
 
               audio.addEventListener("timeupdate", updateUi);
@@ -509,22 +562,44 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     margin-bottom: var(--space-2);
   }
 
-  .entry-audio-player__toggle {
+  .entry-audio-player__transport {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+  }
+
+  .entry-audio-player__toggle,
+  .entry-audio-player__skip {
     border: 1px solid color-mix(in srgb, var(--pine) 70%, #1f3329 30%);
     border-radius: 999px;
-    background: linear-gradient(180deg, #4f6f60, #2f4a3d);
     color: #fff9e9;
     font-family: var(--font-accent);
     font-size: var(--text-xs);
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    padding: 0.3rem 0.62rem;
     cursor: pointer;
+  }
+
+  .entry-audio-player__toggle {
+    background: linear-gradient(180deg, #4f6f60, #2f4a3d);
+    padding: 0.3rem 0.62rem;
+  }
+
+  .entry-audio-player__skip {
+    background: linear-gradient(180deg, #6a5c4a, #524638);
+    border-color: color-mix(in srgb, var(--border) 65%, #2f2018 35%);
+    padding: 0.28rem 0.48rem;
   }
 
   .entry-audio-player__toggle:hover,
   .entry-audio-player__toggle:focus-visible {
     background: linear-gradient(180deg, #5d806f, #365545);
+    outline: none;
+  }
+
+  .entry-audio-player__skip:hover,
+  .entry-audio-player__skip:focus-visible {
+    background: linear-gradient(180deg, #766654, #5d4f40);
     outline: none;
   }
 
@@ -686,6 +761,17 @@ const youtubeEmbedUrl = hasYouTubeEmbed
 
   :global(.leaflet-bottom.leaflet-right) {
     display: none !important;
+  }
+
+  @media (max-width: 42rem) {
+    .entry-audio-player__top {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .entry-audio-player__time {
+      justify-self: start;
+    }
   }
 
   @media (min-width: 760px) {
