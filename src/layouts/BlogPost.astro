@@ -81,10 +81,107 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     <h1>{title}</h1>
 
     {audioSrc && (
-      <div class="entry-audio" aria-label="Audio narration">
-        <audio controls preload="none" src={audioSrc}>
+      <div class="entry-audio-player" data-audio-player aria-label="Audio narration">
+        <audio preload="none" src={audioSrc} data-audio-el>
           <a href={audioSrc}>Listen to audio narration</a>
         </audio>
+
+        <div class="entry-audio-player__top">
+          <button class="entry-audio-player__toggle" type="button" data-audio-toggle>
+            ▶ Play
+          </button>
+          <p class="entry-audio-player__label">Road-trip narration</p>
+          <p class="entry-audio-player__time" data-audio-time>0:00 / --:--</p>
+        </div>
+
+        <input
+          class="entry-audio-player__seek"
+          data-audio-seek
+          type="range"
+          min="0"
+          max="1000"
+          step="1"
+          value="0"
+          aria-label="Seek narration"
+        />
+
+        <div class="entry-audio-player__bottom">
+          <label class="entry-audio-player__speed">
+            Speed
+            <select data-audio-rate>
+              <option value="0.85">0.85×</option>
+              <option value="1" selected>1.0×</option>
+              <option value="1.15">1.15×</option>
+              <option value="1.3">1.3×</option>
+            </select>
+          </label>
+
+          <a class="entry-audio-player__download" href={audioSrc} download>
+            Download MP3
+          </a>
+        </div>
+
+        <script is:inline>
+          (() => {
+            const formatTime = (seconds) => {
+              if (!Number.isFinite(seconds)) return "--:--";
+              const mins = Math.floor(seconds / 60);
+              const secs = Math.floor(seconds % 60)
+                .toString()
+                .padStart(2, "0");
+              return `${mins}:${secs}`;
+            };
+
+            const roots = document.querySelectorAll("[data-audio-player]");
+            for (const root of roots) {
+              const audio = root.querySelector("[data-audio-el]");
+              const toggle = root.querySelector("[data-audio-toggle]");
+              const seek = root.querySelector("[data-audio-seek]");
+              const time = root.querySelector("[data-audio-time]");
+              const rate = root.querySelector("[data-audio-rate]");
+
+              if (!(audio instanceof HTMLAudioElement) || !toggle || !seek || !time || !rate) continue;
+
+              const updateUi = () => {
+                const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+                const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+                const progress = duration > 0 ? Math.round((current / duration) * 1000) : 0;
+                seek.value = String(progress);
+                time.textContent = `${formatTime(current)} / ${formatTime(audio.duration)}`;
+                toggle.textContent = audio.paused ? "▶ Play" : "❚❚ Pause";
+              };
+
+              toggle.addEventListener("click", () => {
+                if (audio.paused) {
+                  void audio.play();
+                } else {
+                  audio.pause();
+                }
+              });
+
+              seek.addEventListener("input", () => {
+                const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+                if (duration <= 0) return;
+                const ratio = Number(seek.value) / 1000;
+                audio.currentTime = Math.max(0, Math.min(duration, ratio * duration));
+              });
+
+              rate.addEventListener("change", () => {
+                const next = Number(rate.value);
+                if (!Number.isFinite(next) || next <= 0) return;
+                audio.playbackRate = next;
+              });
+
+              audio.addEventListener("timeupdate", updateUi);
+              audio.addEventListener("loadedmetadata", updateUi);
+              audio.addEventListener("play", updateUi);
+              audio.addEventListener("pause", updateUi);
+              audio.addEventListener("ended", updateUi);
+
+              updateUi();
+            }
+          })();
+        </script>
       </div>
     )}
 
@@ -388,19 +485,113 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     line-height: 1.35;
   }
 
-  .entry-audio {
+  .entry-audio-player {
     margin: 0 0 var(--space-4);
-    padding: 0.45rem 0.55rem;
+    padding: 0.6rem;
     border: 1px solid color-mix(in srgb, var(--border) 82%, #2f2018 18%);
     border-radius: var(--radius-1);
-    background: rgba(255, 250, 235, 0.72);
-    box-shadow: inset 0 0 0 1px rgba(255, 252, 242, 0.35);
+    background:
+      linear-gradient(180deg, rgba(255, 250, 235, 0.92), rgba(246, 235, 208, 0.88));
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 252, 242, 0.35),
+      0 4px 10px rgba(28, 18, 13, 0.12);
   }
 
-  .entry-audio audio {
-    display: block;
+  .entry-audio-player audio {
+    display: none;
+  }
+
+  .entry-audio-player__top {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .entry-audio-player__toggle {
+    border: 1px solid color-mix(in srgb, var(--pine) 70%, #1f3329 30%);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4f6f60, #2f4a3d);
+    color: #fff9e9;
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.62rem;
+    cursor: pointer;
+  }
+
+  .entry-audio-player__toggle:hover,
+  .entry-audio-player__toggle:focus-visible {
+    background: linear-gradient(180deg, #5d806f, #365545);
+    outline: none;
+  }
+
+  .entry-audio-player__label,
+  .entry-audio-player__time {
+    margin: 0;
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    color: var(--pine-soft);
+    line-height: 1.3;
+  }
+
+  .entry-audio-player__time {
+    white-space: nowrap;
+  }
+
+  .entry-audio-player__seek {
     width: 100%;
-    height: 2rem;
+    accent-color: #2f4a3d;
+    margin: 0 0 var(--space-2);
+  }
+
+  .entry-audio-player__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .entry-audio-player__speed {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    margin: 0;
+    color: var(--pine-soft);
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+  }
+
+  .entry-audio-player__speed select {
+    border: 1px solid color-mix(in srgb, var(--border) 72%, #2f2018 28%);
+    border-radius: 0.48rem;
+    background: rgba(255, 250, 235, 0.95);
+    color: var(--ink);
+    font: inherit;
+    padding: 0.18rem 0.35rem;
+  }
+
+  .entry-audio-player__download {
+    color: var(--pine-soft);
+    font-family: var(--font-accent);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    text-decoration: none;
+    border-bottom: 1px dashed color-mix(in srgb, var(--pine-soft) 76%, #1f3329 24%);
+  }
+
+  .entry-audio-player__download:hover,
+  .entry-audio-player__download:focus-visible {
+    color: #2f4a3d;
+    outline: none;
   }
 
   .meta-location {
