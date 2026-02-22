@@ -57,7 +57,6 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
       </h1>
     </div>
     <div class="route-progress__stats">
-      <p><strong>Scope:</strong> Santa Monica → Albuquerque</p>
       <p><strong>Current:</strong> {currentStopMeta ? `${currentStopMeta.city}` : "Not logged yet"}</p>
       <p><strong>Next:</strong> {nextStop ? `${nextStop.city}` : "Route complete"}</p>
       <p><strong>Complete:</strong> {progressPercent}%</p>
