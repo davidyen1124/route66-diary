@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import FormattedDate from "../components/FormattedDate.astro";
 import SnowOverlay from "../components/SnowOverlay.astro";
 import ChileRistraOverlay from "../components/ChileRistraOverlay.astro";
+import AudioToggleIcon from "../components/AudioToggleIcon";
 import SiteShell from "./SiteShell.astro";
 
 type Props = CollectionEntry<"blog">["data"] & {
@@ -91,9 +92,10 @@ const youtubeEmbedUrl = hasYouTubeEmbed
             class="entry-audio-player__toggle"
             type="button"
             data-audio-toggle
-            aria-label="Play or pause narration"
+            aria-pressed="false"
+            aria-label="Play narration"
           >
-            ▶
+            <AudioToggleIcon />
           </button>
           <p class="entry-audio-player__time" data-audio-time>0:00 / --:--</p>
         </div>
@@ -127,7 +129,14 @@ const youtubeEmbedUrl = hasYouTubeEmbed
               const seek = root.querySelector("[data-audio-seek]");
               const time = root.querySelector("[data-audio-time]");
 
-              if (!(audio instanceof HTMLAudioElement) || !toggle || !seek || !time) continue;
+              if (
+                !(audio instanceof HTMLAudioElement) ||
+                !(toggle instanceof HTMLButtonElement) ||
+                !(seek instanceof HTMLInputElement) ||
+                !(time instanceof HTMLElement)
+              ) {
+                continue;
+              }
 
               if (audio.preload === "none") {
                 audio.preload = "metadata";
@@ -139,7 +148,9 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                 const progress = duration > 0 ? Math.round((current / duration) * 1000) : 0;
                 seek.value = String(progress);
                 time.textContent = `${formatTime(current)} / ${formatTime(audio.duration)}`;
-                toggle.textContent = audio.paused ? "▶" : "❚❚";
+                const isPaused = audio.paused;
+                toggle.setAttribute("aria-pressed", isPaused ? "false" : "true");
+                toggle.setAttribute("aria-label", isPaused ? "Play narration" : "Pause narration");
               };
 
               toggle.addEventListener("click", () => {
@@ -503,15 +514,14 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     border-radius: 999px;
     background: rgba(46, 70, 58, 0.92);
     color: #fff9ed;
-    font-family: var(--font-accent);
-    font-size: 0.85rem;
-    letter-spacing: 0.02em;
     cursor: pointer;
     width: 2.4rem;
     height: 2.4rem;
+    padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    line-height: 0;
     box-shadow:
       inset 0 0 0 1px rgba(255, 252, 242, 0.2),
       0 4px 10px rgba(25, 35, 29, 0.2);
@@ -519,6 +529,33 @@ const youtubeEmbedUrl = hasYouTubeEmbed
       transform 0.15s ease,
       box-shadow 0.15s ease,
       background 0.2s ease;
+  }
+
+  .entry-audio-player__toggle :global(.entry-audio-player__toggle-icons) {
+    width: 1rem;
+    height: 1rem;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  .entry-audio-player__toggle :global(.entry-audio-player__icon) {
+    grid-area: 1 / 1;
+    width: 1rem;
+    height: 1rem;
+    transition: opacity 0.12s ease;
+  }
+
+  .entry-audio-player__toggle :global(.entry-audio-player__icon--pause) {
+    opacity: 0;
+  }
+
+  .entry-audio-player__toggle[aria-pressed="true"] :global(.entry-audio-player__icon--play) {
+    opacity: 0;
+  }
+
+  .entry-audio-player__toggle[aria-pressed="true"] :global(.entry-audio-player__icon--pause) {
+    opacity: 1;
   }
 
   .entry-audio-player__toggle:hover,
