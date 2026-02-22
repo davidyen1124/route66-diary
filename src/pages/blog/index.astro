@@ -11,22 +11,25 @@ const posts = (await getCollection("blog")).sort(
 const slugIndex = buildBlogSlugIndex(posts);
 
 const routeStops = [
-  { city: "Santa Monica", state: "CA" },
-  { city: "Barstow", state: "CA" },
-  { city: "Needles", state: "CA" },
-  { city: "Kingman", state: "AZ" },
-  { city: "Seligman", state: "AZ" },
-  { city: "Flagstaff", state: "AZ" },
-  { city: "Winslow", state: "AZ" },
-  { city: "Holbrook", state: "AZ" },
-  { city: "Gallup", state: "NM" },
-  { city: "Albuquerque", state: "NM" },
+  { city: "Santa Monica", state: "CA", label: "Santa Monica, CA" },
+  { city: "Barstow", state: "CA", label: "Barstow, CA" },
+  { city: "Needles", state: "CA", label: "Needles, CA" },
+  { city: "Kingman", state: "AZ", label: "Kingman, AZ" },
+  { city: "Seligman", state: "AZ", label: "Seligman, AZ" },
+  { city: "Flagstaff", state: "AZ", label: "Flagstaff, AZ" },
+  { city: "Winslow", state: "AZ", label: "Winslow, AZ" },
+  { city: "Santa Fe", state: "NM", label: "Santa Fe, NM" },
+  { city: "Albuquerque", state: "NM", label: "Albuquerque, NM" },
 ];
 
+const progressCurrentStopOverride = { city: "Santa Fe", state: "NM" };
+
 const latestPost = posts[0];
-const currentStop = latestPost?.data.city && latestPost?.data.state
+const latestLoggedStop = latestPost?.data.city && latestPost?.data.state
   ? { city: latestPost.data.city, state: latestPost.data.state }
   : null;
+const currentStop = progressCurrentStopOverride ?? latestLoggedStop;
+
 const currentIndex = currentStop
   ? routeStops.findIndex(
       (stop) => stop.city === currentStop.city && stop.state === currentStop.state,
@@ -37,6 +40,7 @@ const completedCount = currentIndex >= 0 ? currentIndex + 1 : 0;
 const progressPercent = routeStops.length > 0
   ? Math.round((completedCount / routeStops.length) * 100)
   : 0;
+const currentStopMeta = currentIndex >= 0 ? routeStops[currentIndex] : null;
 const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
   ? routeStops[currentIndex + 1]
   : null;
@@ -47,12 +51,15 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
   description={SITE_DESCRIPTION}
 >
   <section class="route-progress journal-card" aria-label="Route 66 progress">
-    <h2 class="route-progress__heading">
-      Santa Monica, CA → Albuquerque, NM
-    </h2>
+    <div class="route-progress__top">
+      <h1 class="route-progress__heading">
+        Route 66
+      </h1>
+    </div>
     <div class="route-progress__stats">
-      <p><strong>Current:</strong> {currentStop ? `${currentStop.city}, ${currentStop.state}` : "Not logged yet"}</p>
-      <p><strong>Next:</strong> {nextStop ? `${nextStop.city}, ${nextStop.state}` : "Route complete"}</p>
+      <p><strong>Scope:</strong> Santa Monica → Albuquerque</p>
+      <p><strong>Current:</strong> {currentStopMeta ? `${currentStopMeta.city}` : "Not logged yet"}</p>
+      <p><strong>Next:</strong> {nextStop ? `${nextStop.city}` : "Route complete"}</p>
       <p><strong>Complete:</strong> {progressPercent}%</p>
     </div>
     <ol class="route-timeline" aria-label="Route 66 stop order">
@@ -69,7 +76,7 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
             <li class={`route-timeline__item route-timeline__item--${status}`}>
               <span class="route-timeline__dot" aria-hidden="true" />
               <p class="route-timeline__label">
-                {stop.city}, {stop.state}
+                {stop.label ?? `${stop.city}, ${stop.state}`}
               </p>
               <span class="route-timeline__status">{status}</span>
             </li>
@@ -87,7 +94,7 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
             <p class="post-card__title">{post.data.title}</p>
             <p class="post-card__meta">
               <FormattedDate date={post.data.pubDate} />
-              {post.data.city && post.data.state ? ` · ${post.data.city}, ${post.data.state}` : ""}
+              {post.data.city ? ` · ${post.data.city}` : ""}
             </p>
             <p class="post-card__desc">{post.data.description}</p>
           </a>
@@ -102,9 +109,21 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
     margin: 0 0 var(--space-4);
   }
 
-  .route-progress__heading {
+  .route-progress__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
     margin: 0 0 var(--space-3);
+  }
+
+  .route-progress__heading {
+    margin: 0;
     font-size: var(--text-xl);
+    font-family: var(--font-accent);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    color: var(--pine-soft);
   }
 
   .route-progress__stats {
@@ -117,6 +136,14 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
     margin: 0;
     font-size: var(--text-sm);
     line-height: 1.4;
+    font-family: var(--font-accent);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    color: var(--pine-soft);
+  }
+
+  .route-progress__stats strong {
+    font-weight: inherit;
   }
 
   .route-timeline {
@@ -162,8 +189,12 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
 
   .route-timeline__label {
     margin: 0;
+    font-family: var(--font-accent);
     font-size: var(--text-sm);
     line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: var(--meta-letter-spacing);
+    color: var(--pine-soft);
   }
 
   .route-timeline__status {
@@ -186,10 +217,6 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
 
   .route-timeline__item--current .route-timeline__label {
     font-weight: 700;
-  }
-
-  .route-timeline__item--upcoming .route-timeline__label {
-    color: color-mix(in srgb, var(--ink) 84%, #7c6859 16%);
   }
 
   .post-list {
@@ -236,5 +263,11 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
     margin: 0;
     font-size: var(--text-sm);
     line-height: 1.55;
+  }
+
+  @media (max-width: 42rem) {
+    .route-progress__top {
+      align-items: center;
+    }
   }
 </style>

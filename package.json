@@ -8,7 +8,7 @@
     "build": "node scripts/validate-slugs.mjs && npm run clean:astro && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "deploy": "npm run build && printf \"_worker.js\\n\" > dist/.assetsignore && npx wrangler deploy"
+    "deploy": "npm run build && npx wrangler deploy"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",

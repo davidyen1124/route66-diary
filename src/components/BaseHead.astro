@@ -15,6 +15,7 @@ interface Props {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
+const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN?.trim();
 ---
 
 <!-- Global Metadata -->
@@ -55,3 +56,12 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+{
+	cfBeaconToken && (
+		<script
+			defer
+			src="https://static.cloudflareinsights.com/beacon.min.js"
+			data-cf-beacon={JSON.stringify({ token: cfBeaconToken })}
+		></script>
+	)
+}

@@ -5,13 +5,46 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 
 <SiteShell title={SITE_TITLE} description={SITE_DESCRIPTION}>
   <section class="home-card">
-    <p class="home-eyebrow">Route 66 Diary</p>
+    <div class="route66-sign" data-testid="route66-sign" aria-label="Route 66 highway sign">
+      <svg
+        viewBox="0 0 600 600"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label="US 66 sign"
+      >
+        <path
+          d="M 300,10.00293 c 23.56445,20.075195 54.11719,32.191406 87.5,32.191406 33.38281,0 63.93555,-12.119141 87.5,-32.194336 l 115,115 c -21.16211,30.08105 -33.58789,66.75391 -33.58789,106.32617 0,28.46387 6.42676,55.42481 17.91016,79.5127 C 584.24414,331.66406 590,355.39453 590,380 590,468.36719 518.36719,540 430,540 H 404.88672 C 362.54199,540 324.75098,559.49512 300,590 275.24854,559.49512 237.45801,540 195.11328,540 H 169.99951 C 81.632813,540 9.9995117,468.36719 9.9995117,380 c 0,-24.60547 5.7563473,-48.33594 15.6787113,-69.16113 11.482422,-24.08789 17.910156,-51.04883 17.910156,-79.5127 C 43.588379,191.75391 31.161621,155.08105 10,125 L 125,10 c 23.56445,20.075195 54.1167,32.194336 87.5,32.194336 33.38281,0 63.93555,-12.116211 87.5,-32.191406 z"
+          fill="#fff"
+          stroke="#000"
+          stroke-width="18"
+          stroke-linejoin="round"
+        />
+        <text
+          x="300"
+          y="208"
+          text-anchor="middle"
+          font-size="86"
+          font-weight="800"
+          fill="#000"
+          font-family="var(--font-accent), Arial, sans-serif"
+        >
+          US
+        </text>
+        <text
+          x="300"
+          y="436"
+          text-anchor="middle"
+          font-size="194"
+          font-weight="800"
+          fill="#000"
+          font-family="var(--font-display), Arial, sans-serif"
+        >
+          66
+        </text>
+      </svg>
+    </div>
     <h1>Follow the Road East</h1>
-    <p>
-      Daily notes, miles logged, and roadside moments from Santa Monica to
-      Albuquerque, New Mexico.
-    </p>
-    <a class="home-cta" href="/blog/">Enter Journal</a>
+    <a class="home-cta" href="/blog/">Enter Journey</a>
   </section>
 </SiteShell>
 
@@ -33,21 +66,24 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
     padding: clamp(1.2rem, 3vw, 2rem);
   }
 
-  .home-eyebrow {
-    margin: 0 0 var(--space-2);
-    color: var(--pine-soft);
-    text-transform: uppercase;
-    letter-spacing: var(--meta-letter-spacing);
-    font-size: var(--text-xs);
+  .route66-sign {
+    width: clamp(7.75rem, 23vw, 9.25rem);
+    max-width: 100%;
+    aspect-ratio: 34 / 37;
+    margin: 0 auto var(--space-4);
+    overflow: visible;
+    line-height: 0;
+  }
+
+  .route66-sign svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
   }
 
   .home-card h1 {
-    margin: 0 0 var(--space-3);
-  }
-
-  .home-card p {
     margin: 0 0 var(--space-4);
-    line-height: 1.5;
   }
 
   .home-cta {

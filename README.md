@@ -31,6 +31,9 @@ npm run build
 
 - `npm run build` generates the SSR worker output.
 - `npm run deploy` runs build + writes `dist/.assetsignore` + `npx wrangler deploy`.
+- Optional Cloudflare Web Analytics:
+  - In Cloudflare dashboard, open your site and go to `Analytics & Logs` -> `Web Analytics` and copy the beacon token.
+  - Set `PUBLIC_CF_BEACON_TOKEN` in your build/deploy environment (for example as a CI/CD env var) so Astro can inject the beacon script site-wide.
 
 `wrangler.toml` contains the Cloudflare Worker config (`name`, `main`, compatibility date/flags, assets binding, and KV namespace bindings).
 

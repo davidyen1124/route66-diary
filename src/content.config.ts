@@ -1,6 +1,7 @@
 import { defineCollection, z } from "astro:content";
 
 const blog = defineCollection({
+  type: "content",
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -18,6 +19,7 @@ const blog = defineCollection({
       )
       .optional(),
     weather: z.string().optional(),
+    youtubeEmbedId: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),
 });
