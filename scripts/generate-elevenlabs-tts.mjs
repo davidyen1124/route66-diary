@@ -124,7 +124,7 @@ async function main() {
     if (!title) throw new Error(`Missing frontmatter title in ${sourcePath}`);
 
     const bodyText = toPlainText(parts.body);
-    const narration = `Title: ${title}. ${bodyText}`.trim();
+    const narration = bodyText.trim();
     const chunks = splitIntoChunks(narration);
 
     if (chunks.length === 0) {
