@@ -5,7 +5,9 @@ import SnowOverlay from "../components/SnowOverlay.astro";
 import ChileRistraOverlay from "../components/ChileRistraOverlay.astro";
 import SiteShell from "./SiteShell.astro";
 
-type Props = CollectionEntry<"blog">["data"];
+type Props = CollectionEntry<"blog">["data"] & {
+  audioSrc?: string;
+};
 
 const {
   title,
@@ -16,6 +18,7 @@ const {
   location,
   weather,
   youtubeEmbedId,
+  audioSrc,
   tags = [],
   mapPoints: frontmatterMapPoints = [],
 } = Astro.props as Props;
@@ -76,6 +79,14 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     </p>
 
     <h1>{title}</h1>
+
+    {audioSrc && (
+      <div class="entry-audio" aria-label="Audio narration">
+        <audio controls preload="none" src={audioSrc}>
+          <a href={audioSrc}>Listen to audio narration</a>
+        </audio>
+      </div>
+    )}
 
     <p class="meta">
       <FormattedDate date={pubDate} />
@@ -375,6 +386,21 @@ const youtubeEmbedUrl = hasYouTubeEmbed
     text-transform: uppercase;
     letter-spacing: var(--meta-letter-spacing);
     line-height: 1.35;
+  }
+
+  .entry-audio {
+    margin: 0 0 var(--space-4);
+    padding: 0.45rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--border) 82%, #2f2018 18%);
+    border-radius: var(--radius-1);
+    background: rgba(255, 250, 235, 0.72);
+    box-shadow: inset 0 0 0 1px rgba(255, 252, 242, 0.35);
+  }
+
+  .entry-audio audio {
+    display: block;
+    width: 100%;
+    height: 2rem;
   }
 
   .meta-location {
