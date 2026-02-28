@@ -22,7 +22,7 @@ const routeStops = [
   { city: "Albuquerque", state: "NM", label: "Albuquerque, NM" },
 ];
 
-const progressCurrentStopOverride = { city: "Santa Fe", state: "NM" };
+const progressCurrentStopOverride = { city: "Albuquerque", state: "NM" };
 
 const latestPost = posts[0];
 const latestLoggedStop = latestPost?.data.city && latestPost?.data.state
@@ -36,11 +36,16 @@ const currentIndex = currentStop
     )
   : -1;
 
+const isRouteComplete = currentIndex === routeStops.length - 1;
 const completedCount = currentIndex >= 0 ? currentIndex + 1 : 0;
 const progressPercent = routeStops.length > 0
   ? Math.round((completedCount / routeStops.length) * 100)
   : 0;
-const currentStopMeta = currentIndex >= 0 ? routeStops[currentIndex] : null;
+const currentStopMeta = isRouteComplete
+  ? null
+  : currentIndex >= 0
+    ? routeStops[currentIndex]
+    : null;
 const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
   ? routeStops[currentIndex + 1]
   : null;
@@ -66,11 +71,13 @@ const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
         routeStops.map((stop, index) => {
           const status = currentIndex < 0
             ? "upcoming"
-            : index < currentIndex
+            : isRouteComplete
               ? "completed"
-              : index === currentIndex
-                ? "current"
-                : "upcoming";
+              : index < currentIndex
+                ? "completed"
+                : index === currentIndex
+                  ? "current"
+                  : "upcoming";
           return (
             <li class={`route-timeline__item route-timeline__item--${status}`}>
               <span class="route-timeline__dot" aria-hidden="true" />

@@ -292,7 +292,7 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                   fillOpacity: 0.95,
                 })
                   .addTo(map)
-                  .bindPopup(point.label);
+                  .bindPopup(point.label, { autoPan: false });
                 markerByLabel.set(point.label, { marker, point });
                 markerByNormalizedLabel.set(normalizeLabel(point.label), { marker, point });
                 bounds.push([point.lat, point.lng]);
@@ -318,9 +318,10 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                 if (!match) return false;
 
                 const { marker, point } = match;
-                map.flyTo([point.lat, point.lng], Math.max(map.getZoom(), 12), {
+                const targetZoom = Math.min(14, Math.max(map.getZoom() + 1, 12));
+                map.setView([point.lat, point.lng], targetZoom, {
                   animate: true,
-                  duration: 0.85,
+                  duration: 0.45,
                 });
                 marker.openPopup();
                 return true;
