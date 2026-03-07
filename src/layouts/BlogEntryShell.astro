@@ -194,6 +194,14 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                 toggle.setAttribute("aria-label", isPaused ? "Play narration" : "Pause narration");
               };
 
+              const applySeek = () => {
+                const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+                if (duration <= 0) return;
+                const ratio = Number(seek.value) / 1000;
+                audio.currentTime = Math.max(0, Math.min(duration, ratio * duration));
+                updateUi();
+              };
+
               toggle.addEventListener("click", () => {
                 if (audio.paused) {
                   void audio.play();
@@ -202,17 +210,16 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                 }
               });
 
-              seek.addEventListener("input", () => {
-                const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
-                if (duration <= 0) return;
-                const ratio = Number(seek.value) / 1000;
-                audio.currentTime = Math.max(0, Math.min(duration, ratio * duration));
-              });
+              seek.addEventListener("input", applySeek);
+              seek.addEventListener("change", applySeek);
 
               audio.addEventListener("timeupdate", updateUi);
               audio.addEventListener("loadedmetadata", updateUi);
+              audio.addEventListener("durationchange", updateUi);
               audio.addEventListener("play", updateUi);
               audio.addEventListener("pause", updateUi);
+              audio.addEventListener("seeking", updateUi);
+              audio.addEventListener("seeked", updateUi);
               audio.addEventListener("ended", updateUi);
 
               updateUi();
