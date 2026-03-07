@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { getCollection, render } from "astro:content";
+import BlogNotFound from "../../layouts/BlogNotFound.astro";
 import BlogPost from "../../layouts/BlogPost.astro";
 import { buildBlogSlugIndex } from "../../lib/blogSlugs";
 
@@ -55,15 +56,6 @@ const Content = rendered?.Content;
       <Content />
     </BlogPost>
   ) : (
-    <BlogPost
-      title="Trail entry not found"
-      description="That post could not be located."
-      pubDate={new Date()}
-    >
-      <p>This trail entry does not exist.</p>
-      <p>
-        <a href="/blog">Return to trail log index</a>
-      </p>
-    </BlogPost>
+    <BlogNotFound />
   )
 }

@@ -1,0 +1,26 @@
+---
+import BlogEntryShell from "./BlogEntryShell.astro";
+
+const today = new Date();
+---
+
+<BlogEntryShell
+  title="Trail entry not found"
+  description="The requested trail entry wandered off the Mother Road and ignored all posted signs."
+  pubDate={today}
+  location="Santa Monica Pier"
+  weather="Forecast: low visibility, scattered wrong turns, and a 100% chance of retracing your steps."
+  mapPoints={[{ label: "Santa Monica Pier", latitude: 34.0094, longitude: -118.4973 }]}
+>
+  <p>
+    This trail entry does not exist. It appears to have taken an unscheduled detour, ignored the map,
+    and become emotionally unavailable.
+  </p>
+  <p>
+    The good news is that <strong>Santa Monica Pier</strong> is still on the map, which is more than I
+    can say for this URL.
+  </p>
+  <p>
+    <a href="/blog">Return to trail log index</a>
+  </p>
+</BlogEntryShell>

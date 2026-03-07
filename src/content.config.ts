@@ -19,6 +19,9 @@ const blog = defineCollection({
       )
       .optional(),
     weather: z.string().optional(),
+    postcardImage: z.string(),
+    postcardAlt: z.string(),
+    postcardCaption: z.string().optional(),
     youtubeEmbedId: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),
