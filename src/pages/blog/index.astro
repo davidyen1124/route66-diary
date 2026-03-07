@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import FormattedDate from "../../components/FormattedDate.astro";
+import type { CrowPageContext } from "../../lib/crowContext";
 import SiteShell from "../../layouts/SiteShell.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 import { buildBlogSlugIndex, blogEntryUrl } from "../../lib/blogSlugs";
@@ -49,11 +50,17 @@ const currentStopMeta = isRouteComplete
 const nextStop = currentIndex >= 0 && currentIndex < routeStops.length - 1
   ? routeStops[currentIndex + 1]
   : null;
+
+const crowContext: CrowPageContext = {
+  pageType: "site_page",
+  path: Astro.url.pathname,
+};
 ---
 
 <SiteShell
   title={`${SITE_TITLE} | Trail Journal`}
   description={SITE_DESCRIPTION}
+  crowContext={crowContext}
 >
   <section class="route-progress journal-card" aria-label="Route 66 progress">
     <div class="route-progress__top">

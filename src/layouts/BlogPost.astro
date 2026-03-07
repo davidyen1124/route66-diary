@@ -4,9 +4,11 @@ import FormattedDate from "../components/FormattedDate.astro";
 import SnowOverlay from "../components/SnowOverlay.astro";
 import ChileRistraOverlay from "../components/ChileRistraOverlay.astro";
 import AudioToggleIcon from "../components/AudioToggleIcon";
+import type { CrowPageContext } from "../lib/crowContext";
 import SiteShell from "./SiteShell.astro";
 
 type Props = CollectionEntry<"blog">["data"] & {
+  canonicalSlug?: string;
   audioSrc?: string;
 };
 
@@ -14,6 +16,7 @@ const {
   title,
   description,
   pubDate,
+  canonicalSlug,
   city,
   state,
   location,
@@ -29,6 +32,23 @@ const showChileRistras =
   Array.isArray(tags) && (tags.includes("chile-ristras") || tags.includes("chili-ristras"));
 // David preference: keep this short (no state) in the header meta.
 const locationLabel = location || city || state || "Unknown stop";
+const pathname = Astro.url.pathname;
+const fallbackSlug = pathname.split("/").filter(Boolean).at(1) ?? "";
+const postSlug = canonicalSlug || fallbackSlug;
+const dayMatch = title.match(/^Day\s*(\d+)/i);
+const dayNumber = dayMatch ? Number(dayMatch[1]) : null;
+const pubDateIso = pubDate.toISOString().slice(0, 10);
+const crowPageContext: CrowPageContext = {
+  pageType: "blog_post",
+  postTitle: title,
+  slug: postSlug || null,
+  day: Number.isFinite(dayNumber) ? dayNumber : null,
+  pubDate: pubDateIso,
+  location: locationLabel,
+  city: city || null,
+  state: state || null,
+  path: pathname,
+};
 
 type MapPoint = { key: string; label: string; lat: number; lng: number };
 
@@ -70,7 +90,7 @@ const youtubeEmbedUrl = hasYouTubeEmbed
   : "";
 ---
 
-<SiteShell title={title} description={description}>
+<SiteShell title={title} description={description} crowContext={crowPageContext}>
   <article class="journal-card entry">
     {showChileRistras && <ChileRistraOverlay />}
     {showSnow && <SnowOverlay />}

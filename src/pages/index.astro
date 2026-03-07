@@ -1,9 +1,15 @@
 ---
+import type { CrowPageContext } from "../lib/crowContext";
 import SiteShell from "../layouts/SiteShell.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+
+const crowContext: CrowPageContext = {
+  pageType: "site_page",
+  path: Astro.url.pathname,
+};
 ---
 
-<SiteShell title={SITE_TITLE} description={SITE_DESCRIPTION}>
+<SiteShell title={SITE_TITLE} description={SITE_DESCRIPTION} crowContext={crowContext}>
   <section class="home-card">
     <div class="route66-sign" data-testid="route66-sign" aria-label="Route 66 highway sign">
       <svg

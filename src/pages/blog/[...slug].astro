@@ -47,7 +47,11 @@ const Content = rendered?.Content;
 
 {
   post && Content ? (
-    <BlogPost {...post.data} audioSrc={canonical ? `/audio/blog/${canonical}.mp3` : undefined}>
+    <BlogPost
+      {...post.data}
+      canonicalSlug={canonical ?? undefined}
+      audioSrc={canonical ? `/audio/blog/${canonical}.mp3` : undefined}
+    >
       <Content />
     </BlogPost>
   ) : (
