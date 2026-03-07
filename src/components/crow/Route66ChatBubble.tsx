@@ -1,5 +1,5 @@
 import { CrowClient, type Message } from "@usecrow/client";
-import { AlertCircle, Loader2, MessageCircle, RotateCcw, Send, Square, X } from "lucide-react";
+import { AlertCircle, Loader2, RotateCcw, Send, Square, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -73,8 +73,16 @@ export default function Route66ChatBubble({
     return () => window.removeEventListener("keydown", onEsc);
   }, [isOpen]);
 
-  const sendMessage = async () => {
-    const text = draft.trim();
+  const quickPrompts = [
+    "What happened on this stop?",
+    "How was the weather out here?",
+    "Give me the funniest recap.",
+  ];
+  const lastMessage = messages.at(-1);
+  const showLoadingPlaceholder = isLoading && !(lastMessage?.role === "assistant" && lastMessage.content.trim());
+
+  const sendMessage = async (rawText = draft) => {
+    const text = rawText.trim();
     if (!text || isLoading || !clientRef.current) return;
 
     setError(null);
@@ -107,12 +115,18 @@ export default function Route66ChatBubble({
     clientRef.current?.stop();
   };
 
+  const submitPrompt = (prompt: string) => {
+    void sendMessage(prompt);
+  };
+
   return (
     <div className="route66-chat" data-open={isOpen ? "true" : "false"}>
       {isOpen && (
         <section className="route66-chat__panel" aria-label="Route 66 chat assistant">
           <header className="route66-chat__header">
-            <p className="route66-chat__eyebrow">Route 66 Agent</p>
+            <div className="route66-chat__header-copy">
+              <p className="route66-chat__eyebrow">Route 66 Agent</p>
+            </div>
             <div className="route66-chat__header-actions">
               <button
                 type="button"
@@ -135,6 +149,27 @@ export default function Route66ChatBubble({
           </header>
 
           <div className="route66-chat__messages" ref={messagesRef}>
+            {messages.length === 0 && !isLoading && !error && (
+              <section className="route66-chat__empty" aria-label="Chat suggestions">
+                <p className="route66-chat__empty-title">Co-pilot mode is awake.</p>
+                <p className="route66-chat__empty-copy">
+                  Ask about the route, the weather, or who made the strongest case for a gas-station hot dog.
+                </p>
+                <div className="route66-chat__prompt-list">
+                  {quickPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      className="route66-chat__prompt-chip"
+                      onClick={() => submitPrompt(prompt)}
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {messages.map((message) => (
               (message.role !== "assistant" || message.content.trim()) && (
                 <article key={message.id} className={`route66-chat__msg route66-chat__msg--${message.role}`}>
@@ -145,10 +180,18 @@ export default function Route66ChatBubble({
               )
             ))}
 
-            {isLoading && (
-              <div className="route66-chat__icon-state route66-chat__icon-state--loading" aria-label="Loading">
-                <Loader2 size={16} />
-              </div>
+            {showLoadingPlaceholder && (
+              <article className="route66-chat__msg route66-chat__msg--assistant route66-chat__msg--loading" aria-label="Loading">
+                <div className="route66-chat__loading-topline">
+                  <Loader2 size={15} aria-hidden="true" />
+                  <p className="route66-chat__loading-label">Thinking at highway speed...</p>
+                </div>
+                <div className="route66-chat__loading-lines" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </article>
             )}
             {error && (
               <div className="route66-chat__icon-state route66-chat__icon-state--error" title={error} aria-label={error}>
@@ -163,7 +206,7 @@ export default function Route66ChatBubble({
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 rows={2}
-                placeholder=""
+                placeholder="Ask the road about this page..."
                 aria-label="Message input"
                 className="route66-chat__input"
                 onKeyDown={(event) => {
@@ -185,30 +228,34 @@ export default function Route66ChatBubble({
                     <Square size={14} aria-hidden="true" />
                   </button>
                 )}
-                <button
-                  type="submit"
-                  className="route66-chat__primary-btn"
-                  disabled={!draft.trim() || isLoading}
-                  aria-label="Send message"
-                  title="Send message"
-                >
-                  <Send size={14} aria-hidden="true" />
-                </button>
+                {!isLoading && (
+                  <button
+                    type="submit"
+                    className="route66-chat__primary-btn"
+                    disabled={!draft.trim()}
+                    aria-label="Send message"
+                    title="Send message"
+                  >
+                    <Send size={14} aria-hidden="true" />
+                  </button>
+                )}
               </div>
             </form>
           </footer>
         </section>
       )}
 
-      <button
-        type="button"
-        className="route66-chat__launcher"
-        onClick={() => setIsOpen((open) => !open)}
-        aria-expanded={isOpen}
-        aria-label={isOpen ? "Close Route 66 Agent" : "Open Route 66 Agent"}
-      >
-        {isOpen ? <X size={20} aria-hidden="true" /> : <MessageCircle size={20} aria-hidden="true" />}
-      </button>
+      {!isOpen && (
+        <button
+          type="button"
+          className="route66-chat__launcher"
+          onClick={() => setIsOpen(true)}
+          aria-expanded={isOpen}
+          aria-label="Open Route 66 Agent"
+        >
+          <span className="route66-chat__launcher-badge">66</span>
+        </button>
+      )}
     </div>
   );
 }
