@@ -339,8 +339,15 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                   .trim();
 
               const markerStrokeColor = "#2f4a3d";
+              const createPopupContent = (label) => {
+                const popup = document.createElement("div");
+                popup.textContent = String(label || "");
+                return popup;
+              };
               const bounds = [];
               for (const point of points) {
+                if (!Number.isFinite(point?.lat) || !Number.isFinite(point?.lng)) continue;
+
                 const marker = L.circleMarker([point.lat, point.lng], {
                   radius: 8,
                   color: markerStrokeColor,
@@ -349,7 +356,7 @@ const youtubeEmbedUrl = hasYouTubeEmbed
                   fillOpacity: 0.95,
                 })
                   .addTo(map)
-                  .bindPopup(point.label, { autoPan: false });
+                  .bindPopup(createPopupContent(point.label), { autoPan: false });
                 markerByLabel.set(point.label, { marker, point });
                 markerByNormalizedLabel.set(normalizeLabel(point.label), { marker, point });
                 bounds.push([point.lat, point.lng]);
