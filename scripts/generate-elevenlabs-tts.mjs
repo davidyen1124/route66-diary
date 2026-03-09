@@ -9,6 +9,7 @@ const OUTPUT_DIR = path.resolve("public/audio/blog");
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM";
 const ELEVENLABS_MODEL_ID = process.env.ELEVENLABS_MODEL_ID || "eleven_multilingual_v2";
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const MAX_CHARS_PER_CHUNK = 2400;
 
@@ -122,6 +123,9 @@ async function main() {
 
     if (!slug) throw new Error(`Missing frontmatter slug in ${sourcePath}`);
     if (!title) throw new Error(`Missing frontmatter title in ${sourcePath}`);
+    if (!SLUG_RE.test(slug)) {
+      throw new Error(`Invalid frontmatter slug in ${sourcePath}: "${slug}" (must be URL-safe kebab-case)`);
+    }
 
     const bodyText = toPlainText(parts.body);
     const narration = bodyText.trim();
@@ -138,7 +142,12 @@ async function main() {
       audioParts.push(audio);
     }
 
-    const outputPath = path.join(OUTPUT_DIR, `${slug}.mp3`);
+    const outputPath = path.resolve(OUTPUT_DIR, `${slug}.mp3`);
+    const relativeOutput = path.relative(OUTPUT_DIR, outputPath);
+    if (relativeOutput.startsWith("..") || path.isAbsolute(relativeOutput)) {
+      throw new Error(`Refusing to write outside output directory for slug "${slug}" in ${sourcePath}`);
+    }
+
     await fs.writeFile(outputPath, Buffer.concat(audioParts));
     generated.push(outputPath);
     console.log(outputPath);
