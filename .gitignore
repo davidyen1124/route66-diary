@@ -1,25 +1,8 @@
-# build output
-dist/
-# generated types
-.astro/
-
-# dependencies
 node_modules/
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-scripts/.geocode-cache.json
-
-
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
+dist/
 .DS_Store
+*.log
 
-# jetbrains setting folder
-.idea/
+# Local visual-QA references
+design-comparison-mobile*.jpg
+reference-mobile.png

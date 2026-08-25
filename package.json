@@ -1,47 +1,20 @@
 {
-  "name": "route66-diary",
+  "name": "route66-diary-site",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "version": "0.0.1",
   "scripts": {
-    "clean:astro": "rm -rf .astro",
-    "dev": "npm run clean:astro && astro dev",
-    "build": "node scripts/validate-slugs.mjs && npm run clean:astro && astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "tts:generate": "node scripts/generate-elevenlabs-tts.mjs",
-    "deploy": "npm run build && npx wrangler deploy"
+    "dev": "vite",
+    "build": "vite build && node scripts/prepare-sites-build.mjs",
+    "preview": "vite preview",
+    "test:sites": "node --test tests/sites-worker.test.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.12",
-    "@astrojs/mdx": "^4.3.13",
-    "@astrojs/react": "^4.4.2",
-    "@astrojs/rss": "^4.0.15",
-    "@astrojs/sitemap": "^3.7.0",
-    "@usecrow/client": "^0.1.48",
-    "astro": "^5.18.0",
-    "lucide-react": "^0.577.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "sharp": "^0.34.5"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.6",
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.0.3",
-    "playwright": "^1.58.2",
-    "prettier": "^3.8.1",
-    "prettier-plugin-astro": "^0.14.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.1",
-    "wrangler": "4.71.0"
-  },
-  "overrides": {
-    "@astrojs/check": {
-      "lodash": "4.17.23"
-    },
-    "wrangler": "4.71.0",
-    "undici": "7.18.2"
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/press-start-2p": "^5.3.0",
+    "@vitejs/plugin-react": "5.0.4",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "vite": "6.4.2"
   }
 }
