@@ -6,3 +6,8 @@ dist/
 # Local visual-QA references
 design-comparison-mobile*.jpg
 reference-mobile.png
+.vercel
+
+# Raw ImageGen outputs (processed copies live in public/assets/apple2)
+art-src/
+.env*

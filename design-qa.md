@@ -1,120 +1,45 @@
-# Route 66 article-screen design QA
+# Apple II Oregon Trail design QA
 
-## Comparison target
+## Reference captures
 
-- Source visual truth: `/workspace/scratch/cab2bd574928/generated_images/exec-a67cb2e5-da55-4059-93d6-fb6b8f87df24.png`, the third displayed article mockup selected by the user.
-- Source pixels: `853 × 1844`, normalized to `390 × 844` at density `1`.
-- Browser-rendered implementation: `/workspace/scratch/cab2bd574928/route66-article-mobile-current.jpg`.
-- Implementation pixels and CSS viewport: `390 × 844` at device pixel ratio `1`.
-- State: Part II, Day 1 article, top of page.
-- Same-view composite evidence: `/workspace/scratch/cab2bd574928/route66-article-comparison.png` (`780 × 844`, source on the left and implementation on the right).
+- Wikimedia Commons, [Screenshots of The Oregon Trail (1985)](https://commons.wikimedia.org/wiki/Category:Screenshots_of_The_Oregon_Trail_(1985)): 11 native 280x192 captures. These cover the MECC splash, main menu, trail guide text, the choice of occupation and departure month, size-up menu, talk-to-people, river crossing, fort store, and the Top Ten.
+- R. Philip Bouchard (the game's designer), [The Oregon Trail](https://www.philipbouchard.com/oregon-trail.html): about 50 more 2x captures. These cover the travel screen, approaching and arriving at landmarks, event message boxes, supplies, the map, arrival in Oregon, points and rating, rivers, hunting, rafting, and the store.
 
-## Findings
+## Measurements taken from the captures
 
-No actionable P0, P1, or P2 differences remain.
+- **Font:** proportional; 7 rows plus 1 descender row; strokes 2 pixels wide; 2 blank columns between glyphs (1 for the condensed RETURN prompt); space is 8 pixels; digits sit in 6-pixel cells.
+- **Big title face:** 20 rows tall plus a 4-row descender, with 3-pixel glyph gaps.
+- **Text layout:** line pitch 9; body text x=20 and about 240 pixels wide; "Press SPACE BAR to continue" centered at y=184.
+- **Dividers:** 14 rows tall, blue.
+- **Travel screen:**
+  - Scenery band: rows 13–29.
+  - Ground block: from row 60.
+  - RETURN prompt: y=112.
+  - White status box: rows 121–177, with labels right-aligned on the colon.
+- **Landmark screen:** picture on rows 0–159, white caption bar on rows 160–179, prompt at y=182.
+- **Message box:** 1-pixel black margin, 3-pixel white border with 2-step rounded corners, and text inset 8 by 6.
 
-The implementation keeps the mock's compact green journal masthead, amber two-line title, green metadata, full-width 16:9 airport art, caption rule, numbered green trail, amber event names, and light monospaced story copy. The full event names wrap more than the abbreviated labels in the mock; this is intentional because the user's goal is to make each real location or event easier to identify and read.
+## Verification
 
-## Comparison history
+- **Engine fidelity:** re-rendering the main-menu text and title with the engine and diffing against the native capture gave 0 differing pixels out of 45,920 compared. The ornament rows were excluded because the divider is an original design in the same style.
+- **Content:** a script rebuilds every article's on-screen text and compares it to `src/data.js`. All paragraphs, summaries, and trail stops are present for all 14 days.
+- **Viewports:** checked in the browser at 1440x900@2x (monitor mode, scale 4.5), 390x844@3x, and 375x812@2x (strip mode). No horizontal overflow at any of them.
+- **Flows:** splash to main menu to part to day list to article, using SPACE, RETURN, number keys, B, clicks, and taps. Also the map deep link with a blinking stop, the About pages, and the tombstone 404.
+- **Build:** `npm run build` and `npm run test:sites` pass.
 
-### Pass 1 — passed
+## Revision: picture screens and generated art
 
-- The source and browser capture were normalized to the same `390 × 844` viewport and placed in one comparison image.
-- No visual fixes were made after this comparison because no P0/P1/P2 mismatch was found.
-- The implementation contains longer authentic article copy than the mock's abbreviated sample, so fewer event groups fit above the fold. This is an intentional content-preservation constraint rather than density drift.
+- **Artwork:** 76 pictures generated with the Codex `imagegen` skill (built-in `image_gen`, six parallel `codex exec` sessions): 16 landmark and chapter pictures restyled from the originals, and 60 story pictures. They were reviewed on contact sheets. One landmark was regenerated after the model added a dinosaur skeleton.
+- **Conversion:** palette-native art converts to hi-res with no tone lift (diffusion 0.45). Compared with converting the original full-color illustrations, the silhouettes stay clean and the dither noise disappears.
+- **Content:** `chunkText` output was checked for every paragraph at 5 and 6 lines. There are no lost words, no overflow, and no single-line screens. The article checker confirms every paragraph, summary, and trail stop appears on screen for all 14 days (112 story screens).
+- **Cars:** Part I days show the Kia Sportage (SUV sprite and art); Part II days show the Elantra (sedan sprite and art).
 
-## Required fidelity surfaces
+## Revision: one screen at a time
 
-- **Fonts and typography:** Press Start 2P carries the DOS masthead, labels, title, markers, and event headings. IBM Plex Mono keeps the preserved long-form paragraphs legible at approximately `16px` with a `1.82` line height. Wrapping is clean and no heading or metadata is clipped.
-- **Spacing and layout rhythm:** the compact header, title block, 16:9 image, caption, and timeline follow the source hierarchy. The timeline uses a consistent `50px` marker column and `22px` content gap on mobile. The browser reported `clientWidth: 390` and `scrollWidth: 390`, so there is no horizontal overflow.
-- **Colors and visual tokens:** the implementation reuses the approved near-black, amber, phosphor-green, cream, and muted-green tokens. There are no gradients, shadows, or rounded article cards.
-- **Image quality and asset fidelity:** the original ImageGen airport artwork is used directly, with the same cinematic crop and no placeholder, SVG, CSS-art, or watermark substitute.
-- **Copy and content:** all original paragraphs and every trail stop are preserved. They are distributed into consecutive event groups so no migrated writing or stop disappears. Day 2 exposes all nine stops in five readable groups, and the tested Part I Day 5 exposes all eight stops and all five original paragraphs.
-
-## Focused comparison evidence
-
-A separate crop was unnecessary because the normalized composite keeps the masthead, title, metadata, image, caption, first marker, event heading, and paragraph typography readable at their target CSS size. Those are the detailed fidelity surfaces for this screen.
-
-## Interaction and responsiveness
-
-- Tested `ALL DAYS` back navigation and the `B` keyboard shortcut.
-- Tested Part I / Part II switching after returning from an article.
-- Tested opening Part II Day 2 and verified five groups include every stop through Hampton Inn Pontiac.
-- Tested migrated Part I Day 5 and verified all original paragraphs and stops remain present.
-- Long event headings wrap without horizontal overflow at `390 × 844`.
-- Browser logs contain no application errors. The only observed errors are unrelated cloud-browser extension metadata messages.
-
-## Follow-up polish
-
-- **P3:** the mock includes a decorative back arrow; the implementation keeps the `ALL DAYS` label text-only to respect the project's no-SVG asset direction.
-- **P3:** authentic full-length paragraphs make the page longer than the abbreviated concept, which is preferable for this diary.
-
-## Homepage spacing follow-up
-
-- User reference: `/workspace/scratch/cab2bd574928/upload/9647A7DD-C5BE-41C6-8AC9-EFF7C1097AC5.jpeg`.
-- Browser-rendered implementation: `/workspace/scratch/cab2bd574928/route66-home-gap-mobile.jpg`, captured at `390 × 844` CSS pixels and density `1`.
-- Focused same-view comparison: `/workspace/scratch/cab2bd574928/route66-gap-comparison.png`, reference on the left and corrected implementation on the right.
-- Fix: added an `18px` mobile margin between the chapter route title and cover image. The desktop breakpoint retains its existing `30px` gap.
-- Evidence: the browser measured an exact `18px` title-to-image gap, `clientWidth: 390`, and `scrollWidth: 390`. No neighboring homepage spacing, typography, artwork, or list layout changed.
-- Result: no P0/P1/P2 findings remain for the requested spacing correction.
-
-## Article-header follow-up
-
-- User reference: `/workspace/scratch/cab2bd574928/upload/6077216A-C9EE-45EB-B561-D3768589A5BD.jpeg`.
-- Browser-rendered implementation: `/workspace/scratch/cab2bd574928/route66-day3-no-all-days.jpg`, captured at `390 × 844` CSS pixels and density `1`.
-- Fix: removed the top `ALL DAYS` link so `PART II · DAY 3` follows the compact journal masthead directly. Bottom return navigation and the `B` keyboard shortcut remain available.
-- Evidence: the browser-rendered header sequence is `ROUTE 66 · TRAIL JOURNAL`, then `PART II · DAY 3`, then the article title. The page reports `clientWidth: 390` and `scrollWidth: 390`.
-- Result: no P0/P1/P2 findings remain for the requested header simplification.
-
-## Final result
-
-**final result: passed**
-
----
-
-# Part I itinerary-art extension QA
-
-## Comparison target
-
-- Source visual truth: `/workspace/scratch/cab2bd574928/route66-diary-site/public/assets/part2/day3-pontiac-springfield.png`, an approved Part II itinerary illustration at `1672 × 941` pixels.
-- New implementation asset: `/workspace/scratch/cab2bd574928/route66-diary-site/public/assets/part1/day4-oatman-kingman.webp`, generated at `1672 × 941` pixels and delivered as mobile-optimized WebP.
-- Same-input full-view comparison: `/workspace/scratch/cab2bd574928/route66-part2-part1-style-comparison.jpg`, `1672 × 471` pixels, with the approved Part II image on the left and the new Part I image on the right.
-- Browser-rendered implementation: `/workspace/scratch/cab2bd574928/route66-part1-day4-mobile.jpg`.
-- Implementation pixels and CSS viewport: `390 × 844` at device pixel ratio `1`.
-- State: Part I, Day 4 article, top of page with the new Oatman illustration and first timeline group visible.
-
-## Findings
-
-No actionable P0, P1, or P2 differences remain. The new Part I scene carries forward the approved dense pixel texture, cream road-trip sedan, natural cinematic perspective, dark asphalt, amber practical light, and restrained green accents. Its colder, darker balance is intentional evidence of Day 4's moderate rain rather than palette drift.
-
-## Comparison history
-
-### Pass 1 — passed
-
-- All ten assets were generated as distinct `1672 × 941` ImageGen scenes, visually inspected, and checked against their day-specific route, stops, and weather.
-- The approved Part II source and representative Part I implementation were normalized into a single equal-height visual comparison.
-- No visual fixes were made after the comparison because no P0/P1/P2 mismatch was found.
-
-## Required fidelity surfaces
-
-- **Fonts and typography:** unchanged. The article continues using the approved Press Start 2P hierarchy and IBM Plex Mono story copy; the new image caption follows the same green label treatment.
-- **Spacing and layout rhythm:** unchanged. The new image renders at `350 × 196.875` CSS pixels inside the `390px` mobile viewport, preserving the article's full-width 16:9 slot and vertical rhythm.
-- **Colors and visual tokens:** the new artwork maintains the Part II dark navy/charcoal, amber, cream, and restrained phosphor-green world while varying light naturally by day and weather.
-- **Image quality and asset fidelity:** all ten Part I days now use original ImageGen raster itinerary illustrations. Every production asset is `1672 × 941`; WebP delivery reduces the ten-image payload to approximately `2.4 MB` without visible pixel-art degradation. No SVG, CSS-art, placeholder, or remote legacy postcard remains.
-- **Copy and content:** article titles, dates, weather, body paragraphs, and stops are unchanged. New alt text and captions describe each day's specific itinerary artwork.
-
-## Focused comparison evidence
-
-A separate crop was not needed. At equal height, the full-view image comparison keeps pixel edges, car proportions, road perspective, palette, weather treatment, and landmark density legible. The browser capture separately verifies that the article crop, caption, and first timeline group remain readable in the mobile layout.
-
-## Interaction and responsiveness
-
-- Flow under test: Part I Day 4 article loads → new itinerary art renders → press `B` → Part I saved-games list returns.
-- Browser verified the new image loaded at natural size `1672 × 941`, rendered at `350 × 196.875`, and used the local Part I WebP source.
-- Browser reported `clientWidth: 390` and `scrollWidth: 390`, with no horizontal overflow.
-- The `B` shortcut returned to `/blog/?part=1`; `PART I` remained active and Day 10 was visible in the saved-games list.
-- No application errors were observed. Logged extension metadata and unrelated authentication-page warnings were excluded as browser-environment noise.
-
-## Final result
-
-**final result: passed**
+- **Behavior:** pages no longer scroll. Only the current screen is mounted, and the document height equals the viewport on desktop (1440x900) and phones (390x844 with touch).
+- **Tested flows:**
+  - SPACE, arrows, RETURN to size up, number choices, and B/Esc.
+  - Clicking or tapping a screen continues; choices are picked directly; menus ignore taps outside their choices.
+  - The mouse wheel and swipes in every direction leave the screen unchanged, and the page never scrolls.
+  - The browser Back button returns to the previous screen.
+  - The URL hash follows the screen, so `#saved` and `#size-up` deep links land correctly.

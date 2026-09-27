@@ -73,7 +73,7 @@ test("ships complete social-sharing metadata", async () => {
 
   assert.match(html, /property="og:title" content="Route 66 Trail Journal"/);
   assert.match(html, /property="og:description" content="Two Route 66 journeys/);
-  assert.match(html, /property="og:image" content="https:\/\/route66-trail-journal-david\.davidyen1124\.chatgpt\.site\/og\.png"/);
+  assert.match(html, /property="og:image" content="https:\/\/route66-diary\.vercel\.app\/og\.png"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
-  assert.match(html, /name="twitter:image" content="https:\/\/route66-trail-journal-david\.davidyen1124\.chatgpt\.site\/og\.png"/);
+  assert.match(html, /name="twitter:image" content="https:\/\/route66-diary\.vercel\.app\/og\.png"/);
 });
