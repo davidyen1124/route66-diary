@@ -1,0 +1,4 @@
+art-src
+dist
+node_modules
+.env*
