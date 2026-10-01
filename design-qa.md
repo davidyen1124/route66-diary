@@ -25,7 +25,7 @@
 - **Content:** a script rebuilds every article's on-screen text and compares it to `src/data.js`. All paragraphs, summaries, and trail stops are present for all 14 days.
 - **Viewports:** checked in the browser at 1440x900@2x (monitor mode, scale 4.5), 390x844@3x, and 375x812@2x (strip mode). No horizontal overflow at any of them.
 - **Flows:** splash to main menu to part to day list to article, using SPACE, RETURN, number keys, B, clicks, and taps. Also the map deep link with a blinking stop, the About pages, and the tombstone 404.
-- **Build:** `npm run build` and `npm run test:sites` pass.
+- **Build:** `npm run build` passes.
 
 ## Revision: picture screens and generated art
 
@@ -43,3 +43,8 @@
   - The mouse wheel and swipes in every direction leave the screen unchanged, and the page never scrolls.
   - The browser Back button returns to the previous screen.
   - The URL hash follows the screen, so `#saved` and `#size-up` deep links land correctly.
+
+## Revision: cleanup for the public repo
+
+- **Removed:** the Sites hosting files (`.openai/`, `worker/`, the Sites build step and its test), `.vercelignore`, `.npmrc`, two pictures no screen showed (`p2d1-2`, `p2d1-3`), and a few helpers nothing called.
+- **Comparison:** the build before and after the cleanup was walked in a headless browser with motion reduced: all 21 days plus home, both parts, About, the map, the 404, the old `/blog` links, and deep links at 1440x900@2x, plus a sample of pages at 390x844@3x with touch. All 420 screens matched: identical canvas pixels, choices, titles, URLs, and screen-reader text. Keyboard, mouse, and touch flows with motion on gave the same sequence of screens.

@@ -42,10 +42,6 @@ export class HiRes {
     return x >= 0 && y >= 0 && x < this.w && y < this.h;
   }
 
-  get(x, y) {
-    return this.inBounds(x, y) ? this.bits[y * this.w + x] : 0;
-  }
-
   set(x, y, v = 1) {
     if (this.inBounds(x, y)) this.bits[y * this.w + x] = v ? 1 : 0;
   }

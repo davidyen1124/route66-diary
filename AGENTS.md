@@ -6,7 +6,7 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 
 When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
 
-Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.
+Build app UI in `src/`. The site deploys on Vercel from GitHub: a push to `main` goes to production, and any other branch gets a preview deployment. Run `npm run build` before pushing; it must leave `dist/index.html`. `vercel.json` holds the rewrite that sends every path to the app and the `/blog` redirects.
 
 ## Route 66 diary design decisions
 

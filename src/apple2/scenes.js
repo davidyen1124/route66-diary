@@ -139,7 +139,7 @@ export function captionCase(text) {
     .join(" ");
 }
 
-export function landmarkScene({ id, label, captionLines, picture, pressText = PRESS_SPACE, overlay }) {
+export function landmarkScene({ id, label, captionLines, picture, pressText = PRESS_SPACE }) {
   const barLines = captionLines.length;
   const barH = barLines * LINE + 2;
   const barTop = 180 - barH;
@@ -159,18 +159,13 @@ export function landmarkScene({ id, label, captionLines, picture, pressText = PR
       }
       whiteBand(fb, barTop, barH);
       captionLines.forEach((line, i) => drawCentered(fb, barTop + 2 + i * LINE, line, { invert: true }));
-      const spots = [];
-      if (overlay) spots.push(...(overlay(fb, state) || []));
-      spots.push(continueLine(fb, state, 182, pressText));
-      return { hotspots: spots };
+      return { hotspots: [continueLine(fb, state, 182, pressText)] };
     },
   };
 }
 
 // ---------------------------------------------------------------- text screens
 
-// Header lines centered at the top, blue dividers, wrapped paragraphs. Returns one or
-// more scenes; long text continues on the next screen like the game's trail guide.
 // Paragraphs stay whole on a screen whenever they can; only a paragraph too long for
 // any screen is split, and never so a lone line is left behind.
 export function paginateParagraphs(paragraphs, firstCapacity, restCapacity) {
@@ -218,7 +213,6 @@ export function textScenes({ id, label, header = [], paragraphs, big, lastPress 
   return pages.map((page, index) => ({
     id: `${id}-${index + 1}`,
     label: index === 0 ? label : `${label} (continued)`,
-    textLines: page,
     draw(fb, state) {
       fb.clear();
       let start = 29;
@@ -550,8 +544,6 @@ export function storyScene({ id, label, entry, visual, captionLines, text }) {
   return {
     id,
     label,
-    textChunk: text,
-    captionLines,
     animated: visual.type === "event",
     cursor: visual.type === "map",
     picture: visual.type === "picture" ? { ...visual.picture, height: STORY_PICTURE_H } : undefined,

@@ -104,8 +104,6 @@ export const SCENES = {
   "p1d10-5": { car: true, scene: "the Albuquerque International Sunport: a pueblo-style airport terminal with a jet taking off overhead, the car returned in a rental lot, Sandia mountains behind" },
 
   "p2d1-1": { car: false, scene: "night at an airport: a covered pioneer wagon parked humorously next to a modern passenger jet at the gate, runway lights, the San Francisco skyline in the distance" },
-  "p2d1-2": { car: false, scene: "an airport gate area at night: travelers staring up at a departure screen that has not changed, rows of seats, carry-on bags, a big window with a jet outside" },
-  "p2d1-3": { car: false, scene: "inside an airplane cabin at night: rows of economy seats, dim reading lights, a tired traveler in a window seat, the moonlit wing outside" },
   "p2d1-4": { car: false, scene: "an airport boarding gate: a gate agent handing a lucky traveler an upgrade while a long line of other travelers marches down the jet bridge toward the back of the plane" },
 
   "p2d2-1": { car: true, scene: "dawn at O'Hare airport: a rental car lot with rows of cars under lights, the Elantra being picked up, a plane landing overhead, the Chicago skyline far away" },

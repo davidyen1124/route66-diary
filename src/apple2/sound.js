@@ -51,11 +51,7 @@ function tone(freq, ms, when = 0, volume = 0.05) {
 }
 
 export const sfx = {
-  key: () => tone(1020, 28),
   select: () => tone(1020, 90),
   next: () => tone(700, 22),
   error: () => tone(180, 160, 0, 0.06),
-  arrive: () => {
-    [523, 659, 784, 1046].forEach((f, i) => tone(f, 90, i * 0.11));
-  },
 };

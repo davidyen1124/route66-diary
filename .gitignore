@@ -2,12 +2,8 @@ node_modules/
 dist/
 .DS_Store
 *.log
-
-# Local visual-QA references
-design-comparison-mobile*.jpg
-reference-mobile.png
 .vercel
+.env*
 
 # Raw ImageGen outputs (processed copies live in public/assets/apple2)
 art-src/
-.env*
