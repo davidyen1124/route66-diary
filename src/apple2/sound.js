@@ -33,7 +33,15 @@ export function subscribeSound(fn) {
 function tone(freq, ms, when = 0, volume = 0.05) {
   if (!enabled) return;
   try {
-    ctx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (!ctx) {
+      // An iPhone's silent switch mutes Web Audio unless the page asks for a playback session.
+      try {
+        if (navigator.audioSession) navigator.audioSession.type = "playback";
+      } catch {
+        /* an older Safari may refuse it */
+      }
+      ctx =new (window.AudioContext || window.webkitAudioContext)();
+    }
     if (ctx.state === "suspended") ctx.resume();
     const t = ctx.currentTime + when;
     const osc = ctx.createOscillator();
